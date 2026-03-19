@@ -152,6 +152,7 @@ def four_path_generate_step(
     kv_bits=None,
     kv_group_size: int = 64,
     quantized_kv_start: int = 0,
+    ngram_feed_start: int = 0,
 ) -> Generator[Tuple[int, mx.array, bool, str], None, None]:
     """
     Four-path speculative generation.
@@ -226,9 +227,12 @@ def four_path_generate_step(
             y = y[prefill_step_size:]
             mx.clear_cache()
 
-    # Feed prompt to N-gram
+    # Feed prompt to N-gram (skip system/tool boilerplate if ngram_feed_start set)
     prompt_tokens = prompt.tolist()
-    drafter.feed_prompt(prompt_tokens)
+    if ngram_feed_start > 0 and ngram_feed_start < len(prompt_tokens):
+        drafter.feed_prompt(prompt_tokens[ngram_feed_start:])
+    else:
+        drafter.feed_prompt(prompt_tokens)
 
     # First token from GPU
     tokens, logprobs = _step_standard(y)

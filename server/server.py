@@ -30,8 +30,7 @@ import mlx.core as mx
 
 # Add ngram-engine to path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(SCRIPT_DIR))  # Add repo root for four_path package
-
+sys.path.insert(0, os.path.dirname(SCRIPT_DIR))
 
 from four_path.ngram import NgramPredictor
 from four_path.three_path import ane_generate_async, ANELookahead
@@ -77,24 +76,12 @@ def load_model():
     elapsed = time.perf_counter() - t0
     log.info(f"Model loaded in {elapsed:.1f}s")
 
-    # Try to patch MTP onto the model
-    if os.path.isdir(MTP_WEIGHTS_PATH):
-        try:
-            from four_path.mtp_patch import patch_mtp
-            # Get the language_model (TextModel) from the wrapper
-            lang_model = model.language_model if hasattr(model, "language_model") else model
-            success = patch_mtp(model, MTP_WEIGHTS_PATH)
-            if success:
-                has_mtp = hasattr(lang_model, "mtp_forward")
-                log.info(f"MTP: {has_mtp}")
-            else:
-                log.info("MTP: patch failed, running without")
-        except Exception as e:
-            log.warning(f"MTP patch error: {e}")
-            has_mtp = False
-    else:
-        log.info(f"MTP weights not found at {MTP_WEIGHTS_PATH}, running without")
-        has_mtp = False
+    # MTP disabled for server use - return_hidden path is too slow for interactive
+    # (manual forward pass lacks MLX optimizations). MTP works in standalone benchmarks
+    # where it's called on the already-optimized code path.
+    # TODO: fix by caching hidden states from standard forward pass instead of re-running
+    has_mtp = False
+    log.info("MTP: disabled (return_hidden overhead - fix pending)")
 
     # Warmup
     warmup = mx.array(tokenizer.encode("Hello"), mx.uint32)
@@ -142,26 +129,63 @@ def apply_chat_template(messages, tools=None):
 
 # ── Speculative Generation ──────────────────────────────────────
 
-def spec_generate(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7):
-    """
-    Multi-path speculative generation.
-    Uses four-path (N-gram + MTP + ANE + GPU) when MTP available,
-    falls back to three-path (N-gram + ANE + GPU) otherwise.
-    """
+def _extract_user_content(prompt_text):
+    """Extract clean plaintext from chat template for ANE.
+    Strips all markup, tool definitions, and system instructions."""
+    # Find all user message blocks
+    import re
+    user_blocks = re.findall(
+        r'<\|im_start\|>user\n(.*?)<\|im_end\|>',
+        prompt_text, re.DOTALL
+    )
+    if user_blocks:
+        # Use the last (most recent) user message
+        return user_blocks[-1].strip()
+    # Fallback: strip all tags and take the last chunk
+    cleaned = re.sub(r'<\|[^>]+\|>', '', prompt_text)
+    cleaned = re.sub(r'</?tools>', '', cleaned)
+    cleaned = re.sub(r'\{[^}]{50,}\}', '', cleaned)  # strip large JSON blocks
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned[-1000:] if len(cleaned) > 1000 else cleaned
+
+
+def spec_generate(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, has_tools=False):
+    """Multi-path speculative generation.
+    With tools: N-gram + GPU (ANE 1.7B echoes prompt on short tool prompts)
+    Without tools: N-gram + ANE + GPU (full benefit on domain tasks)"""
+    use_ane = not has_tools
     if has_mtp:
-        return _generate_four_path(prompt_text, prompt_tokens, max_tokens, temperature)
-    return _generate_three_path(prompt_text, prompt_tokens, max_tokens, temperature)
+        return _generate_four_path(prompt_text, prompt_tokens, max_tokens, temperature, use_ane=use_ane)
+    return _generate_three_path(prompt_text, prompt_tokens, max_tokens, temperature, use_ane=use_ane)
 
 
-def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7):
+def _find_content_start(prompt_text, prompt_tokens):
+    """Find where user content starts in the token stream (skip system prompt + tool defs).
+    Only feed user content to the N-gram table to avoid drafting from tool schema boilerplate."""
+    markers = ["<|im_start|>user", "<|user|>", "### User:", "[INST]"]
+    last_pos = -1
+    for marker in markers:
+        pos = prompt_text.rfind(marker)
+        if pos > last_pos:
+            last_pos = pos
+    if last_pos <= 0:
+        return len(prompt_tokens) * 6 // 10
+    prefix_tokens = tokenizer.encode(prompt_text[:last_pos])
+    return len(prefix_tokens)
+
+
+def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, use_ane=True):
     """Four-path: N-gram (CPU) + MTP (GPU head) + ANE (1.7B) + GPU (9B)."""
     lang_model = model.language_model if hasattr(model, "language_model") else model
     prompt = mx.array(prompt_tokens, mx.uint32)
     drafter = FourPathDrafter(ngram_n=NGRAM_N)
+    ngram_start = _find_content_start(prompt_text, prompt_tokens)
+    log.info(f"ngram_feed_start={ngram_start}/{len(prompt_tokens)} ({ngram_start*100//len(prompt_tokens)}% skipped)")
 
     # Launch ANE
-    if ane_available:
-        ane_text = prompt_text[-2000:] if len(prompt_text) > 2000 else prompt_text
+    if ane_available and use_ane:
+        # Give ANE clean plaintext only - no chat template, no tool defs
+        ane_text = _extract_user_content(prompt_text)
         ane_lookahead = ane_generate_async(ane_text, max_tokens=max_tokens)
         drafter.set_ane_lookahead(ane_lookahead)
     else:
@@ -189,6 +213,7 @@ def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature
         prompt, lang_model, drafter, tokenizer=tokenizer,
         num_draft_tokens=NUM_DRAFT, max_tokens=max_tokens,
         sampler=sampler if temperature > 0 else None,
+        ngram_feed_start=ngram_start,
     ):
         output_tokens.append(tok)
         sources[source] = sources.get(source, 0) + 1
@@ -214,7 +239,7 @@ def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature
     }
 
 
-def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7):
+def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, use_ane=True):
     """Three-path fallback: N-gram (CPU) + ANE (1.7B) + GPU (9B)."""
     import functools
     from mlx_lm.generate import generation_stream, maybe_quantize_kv_cache
@@ -223,15 +248,17 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
     prompt = mx.array(prompt_tokens, mx.uint32)
     ngram = NgramPredictor(n=NGRAM_N)
 
-    # Feed prompt to N-gram
-    ngram.feed(prompt_tokens)
+    # Feed only user content to N-gram (skip system prompt + tool definitions)
+    content_start = _find_content_start(prompt_text, prompt_tokens)
+    ngram.feed(prompt_tokens[content_start:])
     all_tokens = list(prompt_tokens)
 
     # Launch ANE lookahead
     ane_lookahead = None
     ane_position = 0
-    if ane_available:
-        ane_text = prompt_text[-2000:] if len(prompt_text) > 2000 else prompt_text
+    if ane_available and use_ane:
+        # Give ANE clean plaintext only - no chat template, no tool defs
+        ane_text = _extract_user_content(prompt_text)
         ane_lookahead = ane_generate_async(ane_text, max_tokens=max_tokens)
 
     # Create cache
@@ -534,6 +561,7 @@ class SpecHandler(BaseHTTPRequestHandler):
                     prompt_text, prompt_tokens,
                     max_tokens=max_tokens,
                     temperature=temperature,
+                    has_tools=bool(tools),
                 )
             except Exception as e:
                 log.error(f"Generation error: {e}", exc_info=True)

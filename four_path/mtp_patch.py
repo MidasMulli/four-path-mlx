@@ -90,7 +90,7 @@ def _patched_call(self, inputs, cache=None, input_embeddings=None, return_hidden
     are pre-norm (before final RMSNorm + lm_head).
     """
     # If return_hidden not requested, use the original fast path
-    if not return_hidden and not hasattr(self, 'mtp'):
+    if not return_hidden:
         return type(self)._original_call_unpatched(self, inputs, cache=cache,
                                                      input_embeddings=input_embeddings)
 
