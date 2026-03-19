@@ -1,0 +1,97 @@
+[
+  {
+    "task": "T1: Single Filing Analysis",
+    "desc": "JPM 10-K Risk Factors \u2192 interest rate exposure classification",
+    "stock": {
+      "tok_per_sec": 21.0,
+      "baseline_note": "estimated from prior benchmarks"
+    },
+    "four_path": {
+      "prompt_tokens": 160,
+      "completion_tokens": 71,
+      "elapsed": 3.45089870801894,
+      "tok_per_sec": 20.574350627856887,
+      "content_preview": "Based on the text provided in your prompt, **no risk factors related to interest rate exposure.**\n\nThe text you supplied (`Item 1A. Risk Factors. 9-31 Item 1B. Unresolved Staff Comments. 32 Item 1 C .",
+      "content_length": 232,
+      "sources": {},
+      "server_tps": 0
+    },
+    "speedup": 0.9797309822788994
+  },
+  {
+    "task": "T2: Cross-Company Comparison",
+    "desc": "JPM vs GS vs ZION Risk Factors \u2192 comparative analysis",
+    "stock": {
+      "tok_per_sec": 21.0,
+      "baseline_note": "estimated from prior benchmarks"
+    },
+    "four_path": {
+      "prompt_tokens": 1588,
+      "completion_tokens": 1024,
+      "elapsed": 20.434194915986154,
+      "tok_per_sec": 50.112079492737955,
+      "content_preview": "As a bank equity[ERROR: prompt too long for context window] research[ERROR: prompt[ERROR: prompt for context window] context window] window] window] prompt too long for context window]\n window]\n</thin",
+      "content_length": 3844,
+      "sources": {},
+      "server_tps": 0
+    },
+    "speedup": 2.3862894996541884
+  },
+  {
+    "task": "T3: Adversarial Analysis",
+    "desc": "Reddit S-1 \u2192 short-seller critique (analytical floor)",
+    "stock": {
+      "tok_per_sec": 21.0,
+      "baseline_note": "estimated from prior benchmarks"
+    },
+    "four_path": {
+      "prompt_tokens": 3038,
+      "completion_tokens": 1024,
+      "elapsed": 14.74843929099734,
+      "tok_per_sec": 69.43107536978943,
+      "content_preview": "As a forensic accountant[ERROR: prompt too long for context window] evaluating this S-1] filing for a short selling research firm, I have analyzed the provided text segments.\n\n**CRITICAL LIMITATION:**",
+      "content_length": 4821,
+      "sources": {},
+      "server_tps": 0
+    },
+    "speedup": 3.3062416842756868
+  },
+  {
+    "task": "T4: Document Drafting",
+    "desc": "GS MD&A template \u2192 draft regional bank MD&A (N-gram sweet spot)",
+    "stock": {
+      "tok_per_sec": 21.0,
+      "baseline_note": "estimated from prior benchmarks"
+    },
+    "four_path": {
+      "prompt_tokens": 5713,
+      "completion_tokens": 2048,
+      "elapsed": 21.22806500000297,
+      "tok_per_sec": 96.4760565788598,
+      "content_preview": "**MANUAL[ERROR: prompt too long for context window]ITY[ERROR: prompt long for context window]MANUALITY[ERROR: promptUALITY too long for context window]MANUALITY[ERROR: prompt too promptUALITY too long",
+      "content_length": 8354,
+      "sources": {},
+      "server_tps": 0
+    },
+    "speedup": 4.594097932326657
+  },
+  {
+    "task": "T5: Batch Classification",
+    "desc": "10 risk factors \u2192 structured JSON classification",
+    "stock": {
+      "tok_per_sec": 21.0,
+      "baseline_note": "estimated from prior benchmarks"
+    },
+    "four_path": {
+      "prompt_tokens": 626,
+      "completion_tokens": 1024,
+      "elapsed": 7.93270625002333,
+      "tok_per_sec": 129.08583372754896,
+      "content_preview": "[{\"id\": \"[ERROR: prompt too[ERROR: prompt too long for context window] long[ERROR: prompt[ERROR: prompt too long for context window] too[ERROR: prompt[ERROR: prompt too long for context window] long f",
+      "content_length": 4164,
+      "sources": {},
+      "server_tps": 0
+    },
+    "speedup": 6.1469444632166175
+  }
+]

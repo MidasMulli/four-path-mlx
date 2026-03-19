@@ -1,0 +1,77 @@
+[
+  {
+    "test": "clause_analysis",
+    "desc": "Analytical (novel output)",
+    "prompt_tokens": 1871,
+    "standard": 19.335310313811355,
+    "mtp": {
+      "tok_per_sec": 23.714629086018462,
+      "speedup": 1.2264933275510415,
+      "draft_ratio": 0.390625
+    },
+    "ngram": {
+      "tok_per_sec": 25.51844114821058,
+      "speedup": 1.3197844117341406,
+      "draft_ratio": 0.55859375
+    },
+    "three_path": {
+      "tok_per_sec": 26.847071883664874,
+      "speedup": 1.388499664496608,
+      "sources": {
+        "ngram": 33,
+        "ane": 154,
+        "gpu": 69
+      }
+    }
+  },
+  {
+    "test": "schedule_gen",
+    "desc": "Boilerplate generation",
+    "prompt_tokens": 1854,
+    "standard": 21.701244822283737,
+    "mtp": {
+      "tok_per_sec": 27.887528879895402,
+      "speedup": 1.2850658618098871,
+      "draft_ratio": 0.4453125
+    },
+    "ngram": {
+      "tok_per_sec": 34.623852627322016,
+      "speedup": 1.5954777207881095,
+      "draft_ratio": 0.587890625
+    },
+    "three_path": {
+      "tok_per_sec": 42.57735549039969,
+      "speedup": 1.9619775657606284,
+      "sources": {
+        "ngram": 257,
+        "ane": 173,
+        "gpu": 82
+      }
+    }
+  },
+  {
+    "test": "csa_draft",
+    "desc": "CSA drafting (mixed)",
+    "prompt_tokens": 1830,
+    "standard": 21.756776985052237,
+    "mtp": {
+      "tok_per_sec": 25.965180080292992,
+      "speedup": 1.1934295276424487,
+      "draft_ratio": 0.412109375
+    },
+    "ngram": {
+      "tok_per_sec": 31.404695456650966,
+      "speedup": 1.4434442876455105,
+      "draft_ratio": 0.53125
+    },
+    "three_path": {
+      "tok_per_sec": 36.362469799832276,
+      "speedup": 1.6713169337910079,
+      "sources": {
+        "ngram": 191,
+        "ane": 203,
+        "gpu": 118
+      }
+    }
+  }
+]

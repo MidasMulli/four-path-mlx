@@ -1,0 +1,41 @@
+[
+  {
+    "test": "risk_analysis",
+    "desc": "Risk factor analysis (analytical)",
+    "standard_tps": 21.666481058680716,
+    "four_path_tps": 37.58180476765585,
+    "speedup": 1.7345596945747972,
+    "sources": {
+      "ngram": 148,
+      "ane": 193,
+      "mtp": 41,
+      "gpu": 130
+    }
+  },
+  {
+    "test": "reg_disclosure",
+    "desc": "Regulatory disclosure drafting (boilerplate)",
+    "standard_tps": 21.628842196839162,
+    "four_path_tps": 60.42412186564112,
+    "speedup": 2.793682681473884,
+    "sources": {
+      "ngram": 306,
+      "ane": 160,
+      "mtp": 2,
+      "gpu": 44
+    }
+  },
+  {
+    "test": "md_and_a",
+    "desc": "MD&A section drafting (mixed)",
+    "standard_tps": 21.4239664566618,
+    "four_path_tps": 85.641609814028,
+    "speedup": 3.997467508515337,
+    "sources": {
+      "ngram": 454,
+      "ane": 32,
+      "mtp": 3,
+      "gpu": 23
+    }
+  }
+]

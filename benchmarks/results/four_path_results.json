@@ -1,0 +1,95 @@
+[
+  {
+    "test": "clause_analysis",
+    "desc": "Analytical (novel output)",
+    "standard_tps": 19.94229309241538,
+    "four_path_tps": 29.462166708144178,
+    "speedup": 1.477371061171971,
+    "sources": {
+      "ngram": 60,
+      "ane": 154,
+      "mtp": 0,
+      "gpu": 42
+    },
+    "summary": {
+      "total_rounds": 42,
+      "total_drafted": 1003,
+      "total_accepted": 214,
+      "ngram_drafted": 60,
+      "ane_drafted": 936,
+      "mtp_drafted": 7,
+      "gpu_drafted": 0,
+      "ngram_accepted": 60,
+      "ane_accepted": 154,
+      "mtp_accepted": 0,
+      "gpu_accepted": 0,
+      "ngram_rounds": 2,
+      "ane_rounds": 31,
+      "mtp_rounds": 7,
+      "gpu_rounds": 0,
+      "gpu_only": 42
+    }
+  },
+  {
+    "test": "schedule_gen",
+    "desc": "Boilerplate generation",
+    "standard_tps": 22.03800785558282,
+    "four_path_tps": 46.24192030627084,
+    "speedup": 2.098280416691862,
+    "sources": {
+      "ngram": 250,
+      "ane": 173,
+      "mtp": 12,
+      "gpu": 77
+    },
+    "summary": {
+      "total_rounds": 77,
+      "total_drafted": 1508,
+      "total_accepted": 435,
+      "ngram_drafted": 359,
+      "ane_drafted": 1126,
+      "mtp_drafted": 23,
+      "gpu_drafted": 0,
+      "ngram_accepted": 250,
+      "ane_accepted": 173,
+      "mtp_accepted": 12,
+      "gpu_accepted": 0,
+      "ngram_rounds": 12,
+      "ane_rounds": 38,
+      "mtp_rounds": 23,
+      "gpu_rounds": 0,
+      "gpu_only": 77
+    }
+  },
+  {
+    "test": "csa_draft",
+    "desc": "CSA drafting (mixed)",
+    "standard_tps": 22.045877251047337,
+    "four_path_tps": 46.11761081254861,
+    "speedup": 2.0918927510747025,
+    "sources": {
+      "ngram": 228,
+      "ane": 203,
+      "mtp": 10,
+      "gpu": 71
+    },
+    "summary": {
+      "total_rounds": 71,
+      "total_drafted": 1426,
+      "total_accepted": 441,
+      "ngram_drafted": 368,
+      "ane_drafted": 1036,
+      "mtp_drafted": 22,
+      "gpu_drafted": 0,
+      "ngram_accepted": 228,
+      "ane_accepted": 203,
+      "mtp_accepted": 10,
+      "gpu_accepted": 0,
+      "ngram_rounds": 12,
+      "ane_rounds": 35,
+      "mtp_rounds": 22,
+      "gpu_rounds": 0,
+      "gpu_only": 71
+    }
+  }
+]

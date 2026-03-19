@@ -1,0 +1,170 @@
+[
+  {
+    "test": "clause_analysis",
+    "method": "ngram_n8",
+    "ngram_n": 8,
+    "prompt_tokens": 1950,
+    "generated_tokens": 256,
+    "elapsed": 14.30677475000266,
+    "tok_per_sec": 17.89362064290223,
+    "drafted": 29,
+    "draft_ratio": 0.11328125,
+    "speedup_vs_standard": 0.9163523677471824
+  },
+  {
+    "test": "clause_analysis",
+    "method": "ngram_n12",
+    "ngram_n": 12,
+    "prompt_tokens": 1950,
+    "generated_tokens": 256,
+    "elapsed": 14.450693291000789,
+    "tok_per_sec": 17.715413014780733,
+    "drafted": 0,
+    "draft_ratio": 0.0,
+    "speedup_vs_standard": 0.9072261553814072
+  },
+  {
+    "test": "clause_analysis",
+    "method": "ngram_n16",
+    "ngram_n": 16,
+    "prompt_tokens": 1950,
+    "generated_tokens": 256,
+    "elapsed": 14.849812333006412,
+    "tok_per_sec": 17.23927510053399,
+    "drafted": 0,
+    "draft_ratio": 0.0,
+    "speedup_vs_standard": 0.8828425991519822
+  },
+  {
+    "test": "clause_analysis",
+    "method": "ngram_n24",
+    "ngram_n": 24,
+    "prompt_tokens": 1950,
+    "generated_tokens": 256,
+    "elapsed": 14.995260292023886,
+    "tok_per_sec": 17.072061105612732,
+    "drafted": 0,
+    "draft_ratio": 0.0,
+    "speedup_vs_standard": 0.87427938306372
+  },
+  {
+    "test": "clause_analysis",
+    "method": "standard",
+    "prompt_tokens": 1950,
+    "generated_tokens": 256,
+    "elapsed": 13.110046916990541,
+    "tok_per_sec": 19.527008684326336
+  },
+  {
+    "test": "clause_comparison",
+    "method": "ngram_n8",
+    "ngram_n": 8,
+    "prompt_tokens": 1963,
+    "generated_tokens": 256,
+    "elapsed": 14.593572417012183,
+    "tok_per_sec": 17.54196934683195,
+    "drafted": 24,
+    "draft_ratio": 0.09375,
+    "speedup_vs_standard": 0.9277127934216746
+  },
+  {
+    "test": "clause_comparison",
+    "method": "ngram_n12",
+    "ngram_n": 12,
+    "prompt_tokens": 1963,
+    "generated_tokens": 256,
+    "elapsed": 13.486570292006945,
+    "tok_per_sec": 18.981845973970337,
+    "drafted": 42,
+    "draft_ratio": 0.1640625,
+    "speedup_vs_standard": 1.0038611403680435
+  },
+  {
+    "test": "clause_comparison",
+    "method": "ngram_n16",
+    "ngram_n": 16,
+    "prompt_tokens": 1963,
+    "generated_tokens": 256,
+    "elapsed": 13.56843804102391,
+    "tok_per_sec": 18.867315399605243,
+    "drafted": 32,
+    "draft_ratio": 0.125,
+    "speedup_vs_standard": 0.9978041534371196
+  },
+  {
+    "test": "clause_comparison",
+    "method": "ngram_n24",
+    "ngram_n": 24,
+    "prompt_tokens": 1963,
+    "generated_tokens": 256,
+    "elapsed": 13.422801207983866,
+    "tok_per_sec": 19.072024984451943,
+    "drafted": 30,
+    "draft_ratio": 0.1171875,
+    "speedup_vs_standard": 1.008630286868519
+  },
+  {
+    "test": "clause_comparison",
+    "method": "standard",
+    "prompt_tokens": 1963,
+    "generated_tokens": 256,
+    "elapsed": 13.538643832987873,
+    "tok_per_sec": 18.908836302808833
+  },
+  {
+    "test": "schedule_generation",
+    "method": "ngram_n8",
+    "ngram_n": 8,
+    "prompt_tokens": 1868,
+    "generated_tokens": 512,
+    "elapsed": 11.898342290980509,
+    "tok_per_sec": 43.03120447191367,
+    "drafted": 329,
+    "draft_ratio": 0.642578125,
+    "speedup_vs_standard": 1.971647979887112
+  },
+  {
+    "test": "schedule_generation",
+    "method": "ngram_n12",
+    "ngram_n": 12,
+    "prompt_tokens": 1868,
+    "generated_tokens": 512,
+    "elapsed": 15.274524416978238,
+    "tok_per_sec": 33.51986523592785,
+    "drafted": 266,
+    "draft_ratio": 0.51953125,
+    "speedup_vs_standard": 1.5358476572888335
+  },
+  {
+    "test": "schedule_generation",
+    "method": "ngram_n16",
+    "ngram_n": 16,
+    "prompt_tokens": 1868,
+    "generated_tokens": 512,
+    "elapsed": 19.6901721250033,
+    "tok_per_sec": 26.002819922018034,
+    "drafted": 140,
+    "draft_ratio": 0.2734375,
+    "speedup_vs_standard": 1.1914239445488433
+  },
+  {
+    "test": "schedule_generation",
+    "method": "ngram_n24",
+    "ngram_n": 24,
+    "prompt_tokens": 1868,
+    "generated_tokens": 512,
+    "elapsed": 23.49990891700145,
+    "tok_per_sec": 21.787318487416947,
+    "drafted": 43,
+    "draft_ratio": 0.083984375,
+    "speedup_vs_standard": 0.9982737645865943
+  },
+  {
+    "test": "schedule_generation",
+    "method": "standard",
+    "prompt_tokens": 1868,
+    "generated_tokens": 512,
+    "elapsed": 23.45934254201711,
+    "tok_per_sec": 21.824993564204828
+  }
+]

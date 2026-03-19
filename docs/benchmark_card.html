@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 32px 36px;
+    max-width: 720px;
+    width: 100%;
+  }
+  .title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    color: #8b949e;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #30363d;
+  }
+  th:not(:first-child) { text-align: right; }
+  td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #21262d;
+  }
+  td:not(:first-child) { text-align: right; }
+  .task-name { color: #c9d1d9; font-weight: 500; }
+  .tps { color: #39d353; font-weight: 700; font-size: 14px; }
+  .speedup { font-weight: 700; font-size: 14px; }
+  .sp-low { color: #8b949e; }
+  .sp-mid { color: #d29922; }
+  .sp-high { color: #39d353; }
+  .sp-max { color: #58a6ff; font-size: 15px; }
+  .draft { color: #8b949e; }
+  .sources {
+    font-size: 11px;
+    color: #6e7681;
+  }
+  .bar-cell { width: 140px; }
+  .bar-bg {
+    background: #21262d;
+    border-radius: 4px;
+    height: 16px;
+    display: flex;
+    overflow: hidden;
+  }
+  .bar-ngram { background: #39d353; }
+  .bar-mtp { background: #58a6ff; }
+  .bar-ane { background: #d29922; }
+  .bar-gpu { background: #484f58; }
+  .footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #21262d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hw {
+    font-size: 11px;
+    color: #6e7681;
+  }
+  .legend {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #8b949e;
+  }
+  .legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="title">Four-Path Speculative Decoding</div>
+  <div class="subtitle">Real SEC filings + ISDA agreements &middot; Qwen3.5-9B-MLX-4bit &middot; MacBook Air M5 16GB</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Tokens</th>
+        <th>tok/s</th>
+        <th>Speedup</th>
+        <th>Draft %</th>
+        <th class="bar-cell">Source Attribution</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="task-name">Single Filing Analysis</td>
+        <td>71</td>
+        <td class="tps">20.7</td>
+        <td class="speedup sp-low">0.99x</td>
+        <td class="draft">55%</td>
+        <td class="bar-cell">
+          <div class="bar-bg">
+            <div class="bar-ngram" style="width:42%"></div>
+            <div class="bar-mtp" style="width:13%"></div>
+            <div class="bar-gpu" style="width:45%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name">ISDA Clause Analysis</td>
+        <td>256</td>
+        <td class="tps">29.5</td>
+        <td class="speedup sp-mid">1.48x</td>
+        <td class="draft">84%</td>
+        <td class="bar-cell">
+          <div class="bar-bg">
+            <div class="bar-ngram" style="width:23%"></div>
+            <div class="bar-ane" style="width:60%"></div>
+            <div class="bar-gpu" style="width:17%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name">Cross-Company Comparison</td>
+        <td>1,024</td>
+        <td class="tps">50.2</td>
+        <td class="speedup sp-mid">2.39x</td>
+        <td class="draft">72%</td>
+        <td class="bar-cell">
+          <div class="bar-bg">
+            <div class="bar-ngram" style="width:59%"></div>
+            <div class="bar-mtp" style="width:12%"></div>
+            <div class="bar-ane" style="width:1%"></div>
+            <div class="bar-gpu" style="width:28%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name">Adversarial Critique</td>
+        <td>1,024</td>
+        <td class="tps">69.6</td>
+        <td class="speedup sp-high">3.31x</td>
+        <td class="draft">87%</td>
+        <td class="bar-cell">
+          <div class="bar-bg">
+            <div class="bar-ngram" style="width:83%"></div>
+            <div class="bar-mtp" style="width:4%"></div>
+            <div class="bar-ane" style="width:1%"></div>
+            <div class="bar-gpu" style="width:12%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name">Document Drafting (10-K)</td>
+        <td>2,048</td>
+        <td class="tps" style="color:#58a6ff; font-size:15px">96.6</td>
+        <td class="speedup sp-max">4.60x</td>
+        <td class="draft">94%</td>
+        <td class="bar-cell">
+          <div class="bar-bg">
+            <div class="bar-ngram" style="width:93%"></div>
+            <div class="bar-mtp" style="width:1%"></div>
+            <div class="bar-gpu" style="width:6%"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <div class="hw">Baseline: ~21 tok/s &middot; Stock mlx-lm &middot; Same model, same weights, same output</div>
+    <div class="legend">
+      <span><span class="legend-dot" style="background:#39d353"></span>N-gram</span>
+      <span><span class="legend-dot" style="background:#58a6ff"></span>MTP</span>
+      <span><span class="legend-dot" style="background:#d29922"></span>ANE</span>
+      <span><span class="legend-dot" style="background:#484f58"></span>GPU</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+[
+  {
+    "test": "10k_reg",
+    "baseline": 23.373923745939308,
+    "static_tps": 87.15803150765736,
+    "static_speedup": 3.7288575275171376,
+    "mc_tps": 91.786839911037,
+    "mc_speedup": 3.9268905344564966,
+    "delta_pct": 5.310822563693378,
+    "recoveries": 2,
+    "attempts": 49,
+    "recovery_rate": 0.04081632653061224,
+    "static_sources": {
+      "ngram": 866,
+      "ane": 81,
+      "mtp": 7,
+      "gpu": 70
+    },
+    "mc_sources": {
+      "ngram": 870,
+      "ane": 82,
+      "mtp": 7,
+      "gpu": 65
+    }
+  },
+  {
+    "test": "s1_risk",
+    "baseline": 23.188321059430685,
+    "static_tps": 88.2786366360623,
+    "static_speedup": 3.807030117006225,
+    "mc_tps": 65.56996051854682,
+    "mc_speedup": 2.827714880714899,
+    "delta_pct": -25.723863646800886,
+    "recoveries": 0,
+    "attempts": 45,
+    "recovery_rate": 0.0,
+    "static_sources": {
+      "ngram": 868,
+      "ane": 97,
+      "mtp": 2,
+      "gpu": 57
+    },
+    "mc_sources": {
+      "ngram": 901,
+      "ane": 77,
+      "mtp": 0,
+      "gpu": 46
+    }
+  },
+  {
+    "test": "isda_csa",
+    "baseline": 23.39603236152589,
+    "static_tps": 65.570491303837,
+    "static_speedup": 2.8026329546229305,
+    "mc_tps": 60.583778694724614,
+    "mc_speedup": 2.589489438147338,
+    "delta_pct": -7.6051170426727905,
+    "recoveries": 1,
+    "attempts": 79,
+    "recovery_rate": 0.012658227848101266,
+    "static_sources": {
+      "ngram": 770,
+      "ane": 93,
+      "mtp": 25,
+      "gpu": 136
+    },
+    "mc_sources": {
+      "ngram": 763,
+      "ane": 93,
+      "mtp": 27,
+      "gpu": 141
+    }
+  },
+  {
+    "test": "analysis",
+    "baseline": 21.585779777037665,
+    "static_tps": 36.44287340704076,
+    "static_speedup": 1.6882815345780393,
+    "mc_tps": 39.846678746439395,
+    "mc_speedup": 1.8459689276005284,
+    "delta_pct": 9.340112403817814,
+    "recoveries": 0,
+    "attempts": 52,
+    "recovery_rate": 0.0,
+    "static_sources": {
+      "ngram": 125,
+      "ane": 240,
+      "mtp": 30,
+      "gpu": 117
+    },
+    "mc_sources": {
+      "ngram": 166,
+      "ane": 240,
+      "mtp": 13,
+      "gpu": 93
+    }
+  },
+  {
+    "test": "code",
+    "baseline": 25.67643317878579,
+    "static_tps": 49.144241895013316,
+    "static_speedup": 1.9139824271081758,
+    "mc_tps": 42.032670240644556,
+    "mc_speedup": 1.6370135971756588,
+    "delta_pct": -14.470813629725304,
+    "recoveries": 0,
+    "attempts": 50,
+    "recovery_rate": 0.0,
+    "static_sources": {
+      "ngram": 111,
+      "ane": 237,
+      "mtp": 52,
+      "gpu": 112
+    },
+    "mc_sources": {
+      "ngram": 92,
+      "ane": 237,
+      "mtp": 56,
+      "gpu": 127
+    }
+  }
+]

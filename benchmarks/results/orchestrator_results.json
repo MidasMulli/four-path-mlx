@@ -1,0 +1,362 @@
+[
+  {
+    "test": "10k_reg_disc",
+    "desc": "10-K regulatory disclosure (boilerplate)",
+    "prompt_tokens": 2183,
+    "standard": 23.4261371471039,
+    "static": {
+      "tps": 115.60802407863787,
+      "speedup": 4.935001590432083,
+      "sources": {
+        "ngram": 936,
+        "ane": 32,
+        "mtp": 8,
+        "gpu": 48
+      }
+    },
+    "orchestrated": {
+      "tps": 118.25600968088972,
+      "speedup": 5.048037110783727,
+      "sources": {
+        "ngram": 940,
+        "ane": 32,
+        "mtp": 6,
+        "gpu": 46
+      },
+      "efficiency": 21.78723404255319,
+      "summary": {
+        "total_rounds": 46,
+        "total_forward_passes": 47,
+        "efficiency": 21.78723404255319,
+        "gpu_only_tokens": 46,
+        "sources": {
+          "ngram": {
+            "name": "ngram",
+            "total_proposed": 940,
+            "total_accepted": 940,
+            "lifetime_acceptance": 1.0,
+            "rolling_acceptance": 1.0,
+            "rounds": 30,
+            "wasted_passes": 0,
+            "tokens_per_pass": 31.333333333333332,
+            "recommended_batch": 32,
+            "throttled": false
+          },
+          "ane": {
+            "name": "ane",
+            "total_proposed": 96,
+            "total_accepted": 32,
+            "lifetime_acceptance": 0.3333333333333333,
+            "rolling_acceptance": 0.3333333333333333,
+            "rounds": 3,
+            "wasted_passes": 2,
+            "tokens_per_pass": 10.666666666666666,
+            "recommended_batch": 32,
+            "throttled": false
+          },
+          "mtp": {
+            "name": "mtp",
+            "total_proposed": 12,
+            "total_accepted": 6,
+            "lifetime_acceptance": 0.5,
+            "rolling_acceptance": 0.6,
+            "rounds": 12,
+            "wasted_passes": 6,
+            "tokens_per_pass": 0.5,
+            "recommended_batch": 32,
+            "throttled": false
+          }
+        }
+      }
+    },
+    "improvement_pct": 2.290485996413762
+  },
+  {
+    "test": "s1_risk",
+    "desc": "S-1 risk factors (high boilerplate)",
+    "prompt_tokens": 1950,
+    "standard": 23.257119961301715,
+    "static": {
+      "tps": 105.78303125515887,
+      "speedup": 4.548414912559024,
+      "sources": {
+        "ngram": 915,
+        "ane": 50,
+        "mtp": 8,
+        "gpu": 51
+      }
+    },
+    "orchestrated": {
+      "tps": 72.21198957686607,
+      "speedup": 3.104941183475081,
+      "sources": {
+        "ngram": 941,
+        "ane": 0,
+        "mtp": 11,
+        "gpu": 72
+      },
+      "efficiency": 14.027397260273972,
+      "summary": {
+        "total_rounds": 72,
+        "total_forward_passes": 73,
+        "efficiency": 14.027397260273972,
+        "gpu_only_tokens": 72,
+        "sources": {
+          "ngram": {
+            "name": "ngram",
+            "total_proposed": 1140,
+            "total_accepted": 941,
+            "lifetime_acceptance": 0.8254385964912281,
+            "rolling_acceptance": 1.0,
+            "rounds": 36,
+            "wasted_passes": 1,
+            "tokens_per_pass": 26.13888888888889,
+            "recommended_batch": 32,
+            "throttled": false
+          },
+          "ane": {
+            "name": "ane",
+            "total_proposed": 96,
+            "total_accepted": 0,
+            "lifetime_acceptance": 0.0,
+            "rolling_acceptance": 0.0,
+            "rounds": 3,
+            "wasted_passes": 3,
+            "tokens_per_pass": 0.0,
+            "recommended_batch": 4,
+            "throttled": true
+          },
+          "mtp": {
+            "name": "mtp",
+            "total_proposed": 28,
+            "total_accepted": 11,
+            "lifetime_acceptance": 0.39285714285714285,
+            "rolling_acceptance": 0.7,
+            "rounds": 28,
+            "wasted_passes": 17,
+            "tokens_per_pass": 0.39285714285714285,
+            "recommended_batch": 32,
+            "throttled": false
+          }
+        }
+      }
+    },
+    "improvement_pct": -31.73575315431849
+  },
+  {
+    "test": "isda_csa",
+    "desc": "ISDA CSA drafting (domain boilerplate)",
+    "prompt_tokens": 1803,
+    "standard": 23.312817791399546,
+    "static": {
+      "tps": 49.436531860223205,
+      "speedup": 2.120572995618792,
+      "sources": {
+        "ngram": 566,
+        "ane": 222,
+        "mtp": 48,
+        "gpu": 188
+      }
+    },
+    "orchestrated": {
+      "tps": 48.240129094302326,
+      "speedup": 2.0692534693124416,
+      "sources": {
+        "ngram": 741,
+        "ane": 4,
+        "mtp": 81,
+        "gpu": 198
+      },
+      "efficiency": 5.1457286432160805,
+      "summary": {
+        "total_rounds": 198,
+        "total_forward_passes": 199,
+        "efficiency": 5.1457286432160805,
+        "gpu_only_tokens": 198,
+        "sources": {
+          "ngram": {
+            "name": "ngram",
+            "total_proposed": 1032,
+            "total_accepted": 741,
+            "lifetime_acceptance": 0.7180232558139535,
+            "rolling_acceptance": 1.0,
+            "rounds": 45,
+            "wasted_passes": 3,
+            "tokens_per_pass": 16.466666666666665,
+            "recommended_batch": 32,
+            "throttled": false
+          },
+          "ane": {
+            "name": "ane",
+            "total_proposed": 96,
+            "total_accepted": 4,
+            "lifetime_acceptance": 0.041666666666666664,
+            "rolling_acceptance": 0.041666666666666664,
+            "rounds": 3,
+            "wasted_passes": 2,
+            "tokens_per_pass": 1.3333333333333333,
+            "recommended_batch": 4,
+            "throttled": true
+          },
+          "mtp": {
+            "name": "mtp",
+            "total_proposed": 141,
+            "total_accepted": 81,
+            "lifetime_acceptance": 0.574468085106383,
+            "rolling_acceptance": 0.9,
+            "rounds": 141,
+            "wasted_passes": 60,
+            "tokens_per_pass": 0.574468085106383,
+            "recommended_batch": 32,
+            "throttled": false
+          }
+        }
+      }
+    },
+    "improvement_pct": -2.4200782718811817
+  },
+  {
+    "test": "analysis",
+    "desc": "Risk analysis (novel/analytical)",
+    "prompt_tokens": 2172,
+    "standard": 21.339751856758955,
+    "static": {
+      "tps": 37.694708907379315,
+      "speedup": 1.766408023879633,
+      "sources": {
+        "ngram": 177,
+        "ane": 216,
+        "mtp": 18,
+        "gpu": 101
+      }
+    },
+    "orchestrated": {
+      "tps": 23.641305751929664,
+      "speedup": 1.1078528893222221,
+      "sources": {
+        "ngram": 13,
+        "ane": 0,
+        "mtp": 185,
+        "gpu": 314
+      },
+      "efficiency": 1.6305732484076434,
+      "summary": {
+        "total_rounds": 313,
+        "total_forward_passes": 314,
+        "efficiency": 1.6305732484076434,
+        "gpu_only_tokens": 314,
+        "sources": {
+          "ngram": {
+            "name": "ngram",
+            "total_proposed": 47,
+            "total_accepted": 13,
+            "lifetime_acceptance": 0.2765957446808511,
+            "rolling_acceptance": 0.2765957446808511,
+            "rounds": 2,
+            "wasted_passes": 0,
+            "tokens_per_pass": 6.5,
+            "recommended_batch": 32,
+            "throttled": false
+          },
+          "ane": {
+            "name": "ane",
+            "total_proposed": 96,
+            "total_accepted": 0,
+            "lifetime_acceptance": 0.0,
+            "rolling_acceptance": 0.0,
+            "rounds": 3,
+            "wasted_passes": 3,
+            "tokens_per_pass": 0.0,
+            "recommended_batch": 4,
+            "throttled": true
+          },
+          "mtp": {
+            "name": "mtp",
+            "total_proposed": 304,
+            "total_accepted": 185,
+            "lifetime_acceptance": 0.6085526315789473,
+            "rolling_acceptance": 0.8,
+            "rounds": 304,
+            "wasted_passes": 119,
+            "tokens_per_pass": 0.6085526315789473,
+            "recommended_batch": 32,
+            "throttled": false
+          }
+        }
+      }
+    },
+    "improvement_pct": -37.28216389727441
+  },
+  {
+    "test": "code",
+    "desc": "Python code generation (no domain text)",
+    "prompt_tokens": 47,
+    "standard": 25.484715800335948,
+    "static": {
+      "tps": 60.65893044302806,
+      "speedup": 2.3802082361157204,
+      "sources": {
+        "ngram": 262,
+        "ane": 128,
+        "mtp": 39,
+        "gpu": 83
+      }
+    },
+    "orchestrated": {
+      "tps": 30.54603931332633,
+      "speedup": 1.1986023133490726,
+      "sources": {
+        "ngram": 11,
+        "ane": 0,
+        "mtp": 223,
+        "gpu": 278
+      },
+      "efficiency": 1.8351254480286738,
+      "summary": {
+        "total_rounds": 278,
+        "total_forward_passes": 279,
+        "efficiency": 1.8351254480286738,
+        "gpu_only_tokens": 278,
+        "sources": {
+          "ngram": {
+            "name": "ngram",
+            "total_proposed": 57,
+            "total_accepted": 11,
+            "lifetime_acceptance": 0.19298245614035087,
+            "rolling_acceptance": 0.19298245614035087,
+            "rounds": 3,
+            "wasted_passes": 0,
+            "tokens_per_pass": 3.6666666666666665,
+            "recommended_batch": 8,
+            "throttled": false
+          },
+          "ane": {
+            "name": "ane",
+            "total_proposed": 96,
+            "total_accepted": 0,
+            "lifetime_acceptance": 0.0,
+            "rolling_acceptance": 0.0,
+            "rounds": 3,
+            "wasted_passes": 3,
+            "tokens_per_pass": 0.0,
+            "recommended_batch": 4,
+            "throttled": true
+          },
+          "mtp": {
+            "name": "mtp",
+            "total_proposed": 268,
+            "total_accepted": 223,
+            "lifetime_acceptance": 0.832089552238806,
+            "rolling_acceptance": 0.8,
+            "rounds": 268,
+            "wasted_passes": 45,
+            "tokens_per_pass": 0.832089552238806,
+            "recommended_batch": 32,
+            "throttled": false
+          }
+        }
+      }
+    },
+    "improvement_pct": -49.64296420950628
+  }
+]

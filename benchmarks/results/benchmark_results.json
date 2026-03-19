@@ -1,0 +1,278 @@
+{
+  "timestamp": "2026-03-18 21:05:21",
+  "model_tokenizer": "mlx-community/Qwen3.5-9B-MLX-4bit",
+  "total_tokens": 265917,
+  "documents": 6,
+  "benchmark_1_single_doc": [
+    {
+      "n": 4,
+      "tokens": 78445,
+      "lookups": 78441,
+      "hits": 46368,
+      "correct": 36284,
+      "hit_rate": 0.5911194400887291,
+      "accuracy": 0.4625642202419653,
+      "occupancy": 0.007646799087524414,
+      "feed_time_ms": 33.919309615157545,
+      "lookup_time_ms": 0
+    },
+    {
+      "n": 6,
+      "tokens": 78445,
+      "lookups": 78439,
+      "hits": 37591,
+      "correct": 31938,
+      "hit_rate": 0.47923864404186695,
+      "accuracy": 0.4071699027269598,
+      "occupancy": 0.009738922119140625,
+      "feed_time_ms": 40.872196754207835,
+      "lookup_time_ms": 0
+    },
+    {
+      "n": 8,
+      "tokens": 78445,
+      "lookups": 78437,
+      "hits": 31958,
+      "correct": 28119,
+      "hit_rate": 0.4074352665196272,
+      "accuracy": 0.3584915282328493,
+      "occupancy": 0.011081457138061523,
+      "feed_time_ms": 48.97571064066142,
+      "lookup_time_ms": 0
+    },
+    {
+      "n": 12,
+      "tokens": 78445,
+      "lookups": 78433,
+      "hits": 24809,
+      "correct": 22510,
+      "hit_rate": 0.31630818660512794,
+      "accuracy": 0.28699654482169495,
+      "occupancy": 0.012784957885742188,
+      "feed_time_ms": 65.20430158707313,
+      "lookup_time_ms": 0
+    },
+    {
+      "n": 16,
+      "tokens": 78445,
+      "lookups": 78429,
+      "hits": 20778,
+      "correct": 19617,
+      "hit_rate": 0.26492751405730025,
+      "accuracy": 0.25012431626056686,
+      "occupancy": 0.01374506950378418,
+      "feed_time_ms": 80.89570995070972,
+      "lookup_time_ms": 0
+    },
+    {
+      "n": 24,
+      "tokens": 78445,
+      "lookups": 78421,
+      "hits": 17244,
+      "correct": 16325,
+      "hit_rate": 0.21989008046314126,
+      "accuracy": 0.20817128065186621,
+      "occupancy": 0.014585733413696289,
+      "feed_time_ms": 112.50326037406921,
+      "lookup_time_ms": 0
+    }
+  ],
+  "benchmark_2_chain_draft": [
+    {
+      "n": 4,
+      "chain_attempts": 1568,
+      "total_drafted": 97290,
+      "total_accepted": 14986,
+      "acceptance_rate": 0.15403433035255423,
+      "avg_chain_len": 62.047193877551024,
+      "avg_accepted": 9.557397959183673
+    },
+    {
+      "n": 6,
+      "chain_attempts": 1568,
+      "total_drafted": 92874,
+      "total_accepted": 29584,
+      "acceptance_rate": 0.3185390959794991,
+      "avg_chain_len": 59.23086734693877,
+      "avg_accepted": 18.867346938775512
+    },
+    {
+      "n": 8,
+      "chain_attempts": 1568,
+      "total_drafted": 90859,
+      "total_accepted": 39707,
+      "acceptance_rate": 0.43701779680604014,
+      "avg_chain_len": 57.94579081632653,
+      "avg_accepted": 25.323341836734695
+    },
+    {
+      "n": 12,
+      "chain_attempts": 1568,
+      "total_drafted": 86688,
+      "total_accepted": 53636,
+      "acceptance_rate": 0.6187246216315984,
+      "avg_chain_len": 55.285714285714285,
+      "avg_accepted": 34.20663265306123
+    },
+    {
+      "n": 16,
+      "chain_attempts": 1568,
+      "total_drafted": 87813,
+      "total_accepted": 65528,
+      "acceptance_rate": 0.746222085568196,
+      "avg_chain_len": 56.0031887755102,
+      "avg_accepted": 41.79081632653061
+    },
+    {
+      "n": 24,
+      "chain_attempts": 1568,
+      "total_drafted": 83857,
+      "total_accepted": 69985,
+      "acceptance_rate": 0.834575527385907,
+      "avg_chain_len": 53.48022959183673,
+      "avg_accepted": 44.63329081632653
+    }
+  ],
+  "benchmark_3_cross_doc": [
+    {
+      "n": 4,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52346,
+      "hits": 29816,
+      "correct": 19771,
+      "hit_rate": 0.5695946204103466,
+      "accuracy": 0.37769839147212775,
+      "cross_doc_prediction": 0.37769839147212775
+    },
+    {
+      "n": 6,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52344,
+      "hits": 22443,
+      "correct": 17627,
+      "hit_rate": 0.42875974323704724,
+      "accuracy": 0.336753018493046,
+      "cross_doc_prediction": 0.336753018493046
+    },
+    {
+      "n": 8,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52342,
+      "hits": 18652,
+      "correct": 15047,
+      "hit_rate": 0.3563486301631577,
+      "accuracy": 0.28747468572083607,
+      "cross_doc_prediction": 0.28747468572083607
+    },
+    {
+      "n": 12,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52338,
+      "hits": 13398,
+      "correct": 10410,
+      "hit_rate": 0.25598991172761665,
+      "accuracy": 0.19889946119454316,
+      "cross_doc_prediction": 0.19889946119454316
+    },
+    {
+      "n": 16,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52334,
+      "hits": 9442,
+      "correct": 6650,
+      "hit_rate": 0.18041808384606567,
+      "accuracy": 0.12706844498796194,
+      "cross_doc_prediction": 0.12706844498796194
+    },
+    {
+      "n": 24,
+      "training_docs": 5,
+      "target_tokens": 52350,
+      "lookups": 52326,
+      "hits": 4020,
+      "correct": 1721,
+      "hit_rate": 0.0768260520582502,
+      "accuracy": 0.0328899591025494,
+      "cross_doc_prediction": 0.0328899591025494
+    }
+  ],
+  "benchmark_4_per_doc": [
+    {
+      "name": "aerocentury-isda-2002.txt",
+      "tokens": 78445,
+      "lookups": 78437,
+      "hits": 31958,
+      "correct": 28119,
+      "hit_rate": 0.4074352665196272,
+      "accuracy": 0.3584915282328493,
+      "occupancy": 0.011081457138061523,
+      "feed_time_ms": 52.00713046360761,
+      "lookup_time_ms": 0
+    },
+    {
+      "name": "boa-katy-isda-2002.txt",
+      "tokens": 33949,
+      "lookups": 33941,
+      "hits": 3462,
+      "correct": 2583,
+      "hit_rate": 0.10200053033204678,
+      "accuracy": 0.07610264871394479,
+      "occupancy": 0.0072667598724365234,
+      "feed_time_ms": 22.263709863182157,
+      "lookup_time_ms": 0
+    },
+    {
+      "name": "boa-lkq-isda-2002.txt",
+      "tokens": 28425,
+      "lookups": 28417,
+      "hits": 3330,
+      "correct": 2551,
+      "hit_rate": 0.11718337614808037,
+      "accuracy": 0.08977020797410001,
+      "occupancy": 0.0059812068939208984,
+      "feed_time_ms": 19.008175004273653,
+      "lookup_time_ms": 0
+    },
+    {
+      "name": "citibank-federated-isda-2002.txt",
+      "tokens": 28737,
+      "lookups": 28729,
+      "hits": 2720,
+      "correct": 2075,
+      "hit_rate": 0.0946778516481604,
+      "accuracy": 0.07222666991541647,
+      "occupancy": 0.006201028823852539,
+      "feed_time_ms": 19.23675462603569,
+      "lookup_time_ms": 0
+    },
+    {
+      "name": "citibank-icii-isda-2002.txt",
+      "tokens": 44011,
+      "lookups": 44003,
+      "hits": 4871,
+      "correct": 3717,
+      "hit_rate": 0.11069699793195918,
+      "accuracy": 0.08447151330591096,
+      "occupancy": 0.009329795837402344,
+      "feed_time_ms": 29.399477440165356,
+      "lookup_time_ms": 0
+    },
+    {
+      "name": "macquarie-ung-isda-2002.txt",
+      "tokens": 52350,
+      "lookups": 52342,
+      "hits": 5556,
+      "correct": 3815,
+      "hit_rate": 0.10614802644148102,
+      "accuracy": 0.07288601887585495,
+      "occupancy": 0.011154651641845703,
+      "feed_time_ms": 35.01284000230953,
+      "lookup_time_ms": 0
+    }
+  ]
+}

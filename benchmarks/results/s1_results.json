@@ -1,0 +1,41 @@
+[
+  {
+    "test": "risk_factors",
+    "desc": "Risk factor drafting (highest boilerplate)",
+    "standard_tps": 21.574119117555746,
+    "four_path_tps": 58.49260835355067,
+    "speedup": 2.7112397050757377,
+    "sources": {
+      "ngram": 377,
+      "ane": 102,
+      "mtp": 0,
+      "gpu": 33
+    }
+  },
+  {
+    "test": "use_of_proceeds",
+    "desc": "Use of Proceeds (very formulaic)",
+    "standard_tps": 21.574129723650966,
+    "four_path_tps": 41.28004945438791,
+    "speedup": 1.913405082066139,
+    "sources": {
+      "ngram": 232,
+      "ane": 152,
+      "mtp": 29,
+      "gpu": 99
+    }
+  },
+  {
+    "test": "dilution",
+    "desc": "Dilution section (mathematical/formulaic)",
+    "standard_tps": 21.569108479086342,
+    "four_path_tps": 45.16095979224827,
+    "speedup": 2.0937796217232094,
+    "sources": {
+      "ngram": 270,
+      "ane": 181,
+      "mtp": 1,
+      "gpu": 60
+    }
+  }
+]

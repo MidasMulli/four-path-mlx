@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "four-path-mlx"
+version = "0.1.0"
+description = "Four-path heterogeneous speculative decoding for Apple Silicon"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "mlx>=0.22.0",
+    "mlx-lm>=0.28.0",
+]
+
+[project.optional-dependencies]
+server = []
+benchmarks = []
+
+[project.scripts]
+four-path-server = "server.server:main"

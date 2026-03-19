@@ -1,0 +1,83 @@
+[
+  {
+    "test": "clause_analysis",
+    "desc": "Analytical (novel output)",
+    "prompt_tokens": 1871,
+    "standard": {
+      "tok_per_sec": 19.95589351221361,
+      "tokens": 256
+    },
+    "ngram": {
+      "tok_per_sec": 26.98946429197641,
+      "speedup": 1.3524558184006166,
+      "draft_ratio": 0.5546875
+    },
+    "three_path": {
+      "tok_per_sec": 30.353293665038763,
+      "speedup": 1.521019023601305,
+      "sources": {
+        "ngram": 61,
+        "ane": 154,
+        "gpu": 41
+      },
+      "ngram_accepted": 61,
+      "ane_accepted": 154,
+      "gpu_only": 9,
+      "ane_elapsed_ms": 3996
+    }
+  },
+  {
+    "test": "schedule_gen",
+    "desc": "Boilerplate generation (high repetition)",
+    "prompt_tokens": 1854,
+    "standard": {
+      "tok_per_sec": 21.88477350769825,
+      "tokens": 512
+    },
+    "ngram": {
+      "tok_per_sec": 32.60890774855077,
+      "speedup": 1.4900271980004807,
+      "draft_ratio": 0.552734375
+    },
+    "three_path": {
+      "tok_per_sec": 39.06851106091506,
+      "speedup": 1.7851914732940786,
+      "sources": {
+        "ngram": 266,
+        "ane": 173,
+        "gpu": 73
+      },
+      "ngram_accepted": 266,
+      "ane_accepted": 173,
+      "gpu_only": 16,
+      "ane_elapsed_ms": 4060
+    }
+  },
+  {
+    "test": "csa_draft",
+    "desc": "CSA paragraph drafting (mixed)",
+    "prompt_tokens": 1853,
+    "standard": {
+      "tok_per_sec": 20.96627697739409,
+      "tokens": 512
+    },
+    "ngram": {
+      "tok_per_sec": 43.30310518150527,
+      "speedup": 2.065369317985965,
+      "draft_ratio": 0.673828125
+    },
+    "three_path": {
+      "tok_per_sec": 38.78945105945976,
+      "speedup": 1.8500876956496697,
+      "sources": {
+        "ngram": 255,
+        "ane": 174,
+        "gpu": 83
+      },
+      "ngram_accepted": 255,
+      "ane_accepted": 174,
+      "gpu_only": 15,
+      "ane_elapsed_ms": 3844
+    }
+  }
+]
