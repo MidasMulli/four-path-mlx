@@ -30,11 +30,12 @@ import mlx.core as mx
 
 # Add ngram-engine to path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(SCRIPT_DIR))
+sys.path.insert(0, SCRIPT_DIR)
 
 from four_path.ngram import NgramPredictor
 from four_path.three_path import ane_generate_async, ANELookahead
 from four_path.generate import FourPathDrafter, four_path_generate_step
+from four_path.ane_sync import ANESyncDrafter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
@@ -66,6 +67,10 @@ model_lock = Lock()
 has_mtp = False
 ane_available = False
 
+# Persistent N-gram table - survives across requests, accumulates patterns
+# from all generated tokens in the session. Resets on server restart.
+persistent_ngram = None
+
 
 def load_model():
     global model, tokenizer, has_mtp
@@ -89,6 +94,11 @@ def load_model():
     for _ in generate_step(warmup, model, max_tokens=5):
         pass
     log.info("Warmup complete")
+
+    # Initialize persistent N-gram table
+    global persistent_ngram
+    persistent_ngram = NgramPredictor(n=NGRAM_N)
+    log.info(f"Persistent N-gram table initialized (n={NGRAM_N})")
 
 
 def check_ane():
@@ -129,34 +139,40 @@ def apply_chat_template(messages, tools=None):
 
 # ── Speculative Generation ──────────────────────────────────────
 
-def _extract_user_content(prompt_text):
-    """Extract clean plaintext from chat template for ANE.
-    Strips all markup, tool definitions, and system instructions."""
-    # Find all user message blocks
-    import re
-    user_blocks = re.findall(
-        r'<\|im_start\|>user\n(.*?)<\|im_end\|>',
-        prompt_text, re.DOTALL
-    )
-    if user_blocks:
-        # Use the last (most recent) user message
-        return user_blocks[-1].strip()
-    # Fallback: strip all tags and take the last chunk
-    cleaned = re.sub(r'<\|[^>]+\|>', '', prompt_text)
-    cleaned = re.sub(r'</?tools>', '', cleaned)
-    cleaned = re.sub(r'\{[^}]{50,}\}', '', cleaned)  # strip large JSON blocks
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-    return cleaned[-1000:] if len(cleaned) > 1000 else cleaned
+def _build_ane_context(messages):
+    """Build clean ANE context from raw messages (before chat template).
+    Uses last assistant response + current user message as plain text.
+    No tool schemas, no chat markup - just conversation content."""
+    parts = []
+    for msg in reversed(messages):
+        if msg.get("role") == "assistant" and msg.get("content"):
+            parts.insert(0, msg["content"][:1500])
+            break
+    for msg in reversed(messages):
+        if msg.get("role") == "user" and msg.get("content"):
+            parts.append(msg["content"][:1500])
+            break
+    return "\n\n".join(parts) if parts else ""
 
 
-def spec_generate(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, has_tools=False):
+def spec_generate(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, has_tools=False, messages=None):
     """Multi-path speculative generation.
-    With tools: N-gram + GPU (ANE 1.7B echoes prompt on short tool prompts)
-    Without tools: N-gram + ANE + GPU (full benefit on domain tasks)"""
-    use_ane = not has_tools
+    Tool prompts: N-gram + synchronized ANE (warm KV cache, per-round draft) + GPU
+    Non-tool prompts: N-gram + ANE lookahead + GPU (domain tasks, buffer approach)
+    N-gram persists across requests for session-level pattern matching."""
+    # ANE sync: 0.4% acceptance. Qwen3-1.7B and Qwen3.5-9B are different families
+    # with fundamentally different token distributions. Context length isn't the issue.
+    # Needs same-family draft model (Qwen3.5-1.7B doesn't exist yet, or 4B on Pro).
+    use_ane_sync = False
+    use_ane_lookahead = not has_tools and ane_available
+    ane_context = _build_ane_context(messages or []) if use_ane_lookahead else ""
+
     if has_mtp:
-        return _generate_four_path(prompt_text, prompt_tokens, max_tokens, temperature, use_ane=use_ane)
-    return _generate_three_path(prompt_text, prompt_tokens, max_tokens, temperature, use_ane=use_ane)
+        return _generate_four_path(prompt_text, prompt_tokens, max_tokens, temperature,
+                                    use_ane=use_ane_lookahead, ane_context=ane_context)
+    return _generate_three_path(prompt_text, prompt_tokens, max_tokens, temperature,
+                                 use_ane=use_ane_lookahead, ane_context=ane_context,
+                                 use_ane_sync=use_ane_sync, messages=messages)
 
 
 def _find_content_start(prompt_text, prompt_tokens):
@@ -174,7 +190,7 @@ def _find_content_start(prompt_text, prompt_tokens):
     return len(prefix_tokens)
 
 
-def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, use_ane=True):
+def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, use_ane=True, ane_context=""):
     """Four-path: N-gram (CPU) + MTP (GPU head) + ANE (1.7B) + GPU (9B)."""
     lang_model = model.language_model if hasattr(model, "language_model") else model
     prompt = mx.array(prompt_tokens, mx.uint32)
@@ -183,10 +199,9 @@ def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature
     log.info(f"ngram_feed_start={ngram_start}/{len(prompt_tokens)} ({ngram_start*100//len(prompt_tokens)}% skipped)")
 
     # Launch ANE
-    if ane_available and use_ane:
-        # Give ANE clean plaintext only - no chat template, no tool defs
-        ane_text = _extract_user_content(prompt_text)
-        ane_lookahead = ane_generate_async(ane_text, max_tokens=max_tokens)
+    if ane_available and use_ane and ane_context:
+        # ANE gets clean conversation text - no tool defs, no chat markup
+        ane_lookahead = ane_generate_async(ane_context, max_tokens=max_tokens)
         drafter.set_ane_lookahead(ane_lookahead)
     else:
         ane_lookahead = None
@@ -239,27 +254,42 @@ def _generate_four_path(prompt_text, prompt_tokens, max_tokens=2048, temperature
     }
 
 
-def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7, use_ane=True):
-    """Three-path fallback: N-gram (CPU) + ANE (1.7B) + GPU (9B)."""
+def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperature=0.7,
+                          use_ane=True, ane_context="", use_ane_sync=False, messages=None):
+    """Three-path: N-gram (CPU) + ANE (1.7B) + GPU (9B).
+    use_ane_sync: if True, use synchronized per-round ANE with warm KV cache."""
     import functools
     from mlx_lm.generate import generation_stream, maybe_quantize_kv_cache
     from mlx_lm.models import cache
 
     prompt = mx.array(prompt_tokens, mx.uint32)
-    ngram = NgramPredictor(n=NGRAM_N)
 
-    # Feed only user content to N-gram (skip system prompt + tool definitions)
+    # Use persistent N-gram table - accumulates patterns across all requests
+    ngram = persistent_ngram
+
+    # Feed user content from this request (skip system/tool boilerplate)
     content_start = _find_content_start(prompt_text, prompt_tokens)
     ngram.feed(prompt_tokens[content_start:])
     all_tokens = list(prompt_tokens)
 
-    # Launch ANE lookahead
+    # Launch ANE lookahead (buffer approach for non-tool prompts)
     ane_lookahead = None
     ane_position = 0
-    if ane_available and use_ane:
-        # Give ANE clean plaintext only - no chat template, no tool defs
-        ane_text = _extract_user_content(prompt_text)
-        ane_lookahead = ane_generate_async(ane_text, max_tokens=max_tokens)
+    if ane_available and use_ane and ane_context:
+        ane_lookahead = ane_generate_async(ane_context, max_tokens=max_tokens)
+
+    # Synchronized ANE (per-round with warm KV cache, for tool prompts)
+    ane_sync = None
+    if use_ane_sync:
+        ane_sync = ANESyncDrafter()
+        # With 1024-ctx model, send the last user message for ANE prefill.
+        # The ANE applies its own chat template, so send raw content.
+        user_text = _build_ane_context(messages or [])
+        if user_text:
+            if ane_sync.prefill(user_text):
+                log.info(f"ANE sync prefilled in {ane_sync.prefill_ms:.0f}ms, 1024-ctx model")
+            else:
+                ane_sync = None
 
     # Create cache
     model_cache = cache.make_prompt_cache(model)
@@ -293,8 +323,22 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
     if hasattr(tokenizer, "eos_token_ids") and tokenizer.eos_token_ids:
         eos_ids.update(tokenizer.eos_token_ids)
 
+    # Repetition filter - reject drafts that create output loops
+    def _would_repeat(tok, window=120):
+        """Reject tokens that create a repeated 5-gram in recent output."""
+        if len(output_tokens) < 5:
+            return False
+        cand = tuple(output_tokens[-4:]) + (tok,)
+        recent = output_tokens[-window:]
+        for i in range(len(recent) - 5):
+            if tuple(recent[i:i+5]) == cand:
+                return True
+        return False
+
     # Stats
     sources = {"ngram": 0, "ane": 0, "gpu": 0}
+    ane_proposed = 0
+    ane_rounds = 0
     output_tokens = []
 
     # Prefill
@@ -343,6 +387,8 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                 if tokens_list[n_accepted] != ngram_chain[n_accepted]:
                     break
                 tok = tokens_list[n_accepted]
+                if _would_repeat(tok):
+                    break  # Reject to prevent repetition loop
                 all_tokens.append(tok)
                 output_tokens.append(tok)
                 sources["ngram"] += 1
@@ -350,7 +396,7 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                 if tok in eos_ids or len(output_tokens) >= max_tokens:
                     break
 
-            if output_tokens[-1] in eos_ids or len(output_tokens) >= max_tokens:
+            if output_tokens and output_tokens[-1] in eos_ids or len(output_tokens) >= max_tokens:
                 break
 
             # Rejection/bonus token
@@ -385,6 +431,8 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                     break
 
             if ane_draft:
+                ane_proposed += len(ane_draft)
+                ane_rounds += 1
                 draft_mx = mx.array(ane_draft, mx.uint32)
                 verify_input = mx.concatenate([y, draft_mx])
                 tokens, logprobs = _forward(verify_input, len(ane_draft) + 1)
@@ -396,6 +444,8 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                     if tokens_list[n_accepted] != ane_draft[n_accepted]:
                         break
                     tok = tokens_list[n_accepted]
+                    if _would_repeat(tok):
+                        break  # Reject to prevent repetition loop
                     all_tokens.append(tok)
                     output_tokens.append(tok)
                     sources["ane"] += 1
@@ -425,7 +475,47 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                     break
                 continue
 
-        # ── Standard single-token generation ──
+        # ── Try synchronized ANE draft (per-round, warm KV cache) ──
+        if ane_sync and ane_sync.active:
+            # Launch ANE decode in background while GPU generates
+            ane_future = ane_sync.draft_one_async()
+
+            # GPU generates its token (this takes ~50ms on 9B)
+            tokens, logprobs = _forward(y)
+            mx.eval(tokens, logprobs)
+            gpu_tok = tokens.item() if tokens.ndim == 0 else tokens.tolist()[-1]
+
+            # Check if ANE predicted the same token
+            ane_tok = ane_future.wait(timeout=0.1)
+            if ane_tok is not None and ane_tok == gpu_tok:
+                # ANE got it right - count as ANE-drafted
+                all_tokens.append(gpu_tok)
+                output_tokens.append(gpu_tok)
+                sources["ane"] += 1
+                ane_proposed += 1
+
+                if len(all_tokens) >= n + 1:
+                    ngram.feed(all_tokens[-(n + 1):])
+                y = mx.array([gpu_tok], mx.uint32)
+                if gpu_tok in eos_ids or len(output_tokens) >= max_tokens:
+                    break
+                continue
+            else:
+                # ANE missed - use GPU token, count ANE proposal
+                if ane_tok is not None:
+                    ane_proposed += 1
+                all_tokens.append(gpu_tok)
+                output_tokens.append(gpu_tok)
+                sources["gpu"] += 1
+
+                if len(all_tokens) >= n + 1:
+                    ngram.feed(all_tokens[-(n + 1):])
+                y = mx.array([gpu_tok], mx.uint32)
+                if gpu_tok in eos_ids or len(output_tokens) >= max_tokens:
+                    break
+                continue
+
+        # ── Standard single-token generation (no ANE) ──
         tokens, logprobs = _forward(y)
         mx.eval(tokens, logprobs)
         tok = tokens.item() if tokens.ndim == 0 else tokens.tolist()[-1]
@@ -452,6 +542,15 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
 
     tok_per_sec = len(output_tokens) / elapsed if elapsed > 0 else 0
 
+    # Feed output tokens into persistent N-gram table for next request
+    if output_tokens:
+        persistent_ngram.feed(output_tokens)
+
+    # Log ANE acceptance rate
+    if ane_proposed > 0:
+        accept_rate = sources["ane"] / ane_proposed * 100
+        log.info(f"ANE: {sources['ane']}/{ane_proposed} accepted ({accept_rate:.1f}%) over {ane_rounds} rounds")
+
     return {
         "text": text.strip(),
         "tokens": output_tokens,
@@ -459,6 +558,7 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
         "elapsed": elapsed,
         "tok_per_sec": tok_per_sec,
         "sources": sources,
+        "ane_detail": {"proposed": ane_proposed, "accepted": sources["ane"], "rounds": ane_rounds},
     }
 
 
@@ -562,6 +662,7 @@ class SpecHandler(BaseHTTPRequestHandler):
                     max_tokens=max_tokens,
                     temperature=temperature,
                     has_tools=bool(tools),
+                    messages=messages,
                 )
             except Exception as e:
                 log.error(f"Generation error: {e}", exc_info=True)
