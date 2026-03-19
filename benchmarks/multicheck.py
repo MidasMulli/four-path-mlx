@@ -3,7 +3,7 @@
 Multi-Check Benchmark: Does checking alternative sources at rejection
 points improve throughput?
 
-Key metric: multicheck_recoveries — how often did an alternative source
+Key metric: multicheck_recoveries - how often did an alternative source
 have the right token that the primary source missed?
 """
 
@@ -63,7 +63,7 @@ def run():
     for name, desc, prompt_text, max_tokens in tests:
         prompt_tokens = tokenizer.encode(prompt_text)
         print(f"\n{'─' * 110}")
-        print(f"  {name} — {desc} ({len(prompt_tokens):,} prompt → {max_tokens} gen)")
+        print(f"  {name} - {desc} ({len(prompt_tokens):,} prompt → {max_tokens} gen)")
         print(f"{'─' * 110}")
 
         # Standard
@@ -135,7 +135,7 @@ def run():
               f"N={static_src['ngram']} A={static_src['ane']} M={static_src['mtp']} G={static_src['gpu']}")
         print(f"  Multi-check: {mc_tps:.1f} tok/s ({mc_speedup:.2f}x)  "
               f"N={mc_src['ngram']} A={mc_src['ane']} M={mc_src['mtp']} G={mc_src['gpu']}")
-        print(f"  Recoveries:  {recoveries}/{attempts} ({recovery_rate:.0%}) — "
+        print(f"  Recoveries:  {recoveries}/{attempts} ({recovery_rate:.0%}) - "
               f"times ANE/MTP had the right token at rejection")
         print(f"  Δ Multi-check vs Static: {delta:+.1f}%")
 

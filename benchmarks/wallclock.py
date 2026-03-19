@@ -6,7 +6,7 @@ Measures actual tokens/second on real ISDA prompts, comparing:
   1. Standard generation (baseline)
   2. N-gram speculative generation (CPU draft path)
 
-This is the test that matters — not theoretical hit rates, but real speedup.
+This is the test that matters - not theoretical hit rates, but real speedup.
 
 Usage:
     # Make sure mlx-lm server is NOT running (we load the model directly)
@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 MODEL_ID = "mlx-community/Qwen3.5-9B-MLX-4bit"
 SAMPLES_DIR = Path(__file__).parent.parent / "isda-classifier" / "samples"
 
-# Test prompts — real ISDA analysis tasks
+# Test prompts - real ISDA analysis tasks
 TEST_PROMPTS = [
     {
         "name": "clause_analysis",
@@ -87,7 +87,7 @@ def load_model():
 
 def add_isda_context(prompt: str, n_context_tokens: int = 2000) -> str:
     """
-    Prepend real ISDA text as context. This is key — the N-gram engine
+    Prepend real ISDA text as context. This is key - the N-gram engine
     benefits from having seen similar text in the prompt.
     """
     sample_file = SAMPLES_DIR / "aerocentury-isda-2002.txt"
@@ -236,7 +236,7 @@ def run_benchmarks():
     print(f"  {'─'*25} {'─'*15} {'─'*8} {'─'*10} {'─'*10}")
 
     for r in all_results:
-        drafted = f"{r.get('draft_ratio', 0):.0%}" if "draft_ratio" in r else "—"
+        drafted = f"{r.get('draft_ratio', 0):.0%}" if "draft_ratio" in r else "-"
         speedup = f"{r.get('speedup_vs_standard', 1.0):.2f}x" if "speedup_vs_standard" in r else "baseline"
         print(f"  {r['test']:<25} {r['method']:<15} {r['tok_per_sec']:>7.1f} {drafted:>10} {speedup:>10}")
 

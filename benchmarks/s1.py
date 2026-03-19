@@ -2,7 +2,7 @@
 """
 S-1 Pre-IPO Filing Benchmark: Four-Path on Registration Statements
 
-S-1s are the most formulaic SEC filings — risk factors, use of proceeds,
+S-1s are the most formulaic SEC filings - risk factors, use of proceeds,
 dilution sections are practically templated across tech IPOs.
 
 Usage:
@@ -52,7 +52,7 @@ def run():
 
     # ── Phase 1: Cross-document N-gram analysis ──────────────────
     print(f"\n{'=' * 90}")
-    print("PHASE 1: Cross-Document N-gram Repetition — S-1 vs 10-K vs ISDA")
+    print("PHASE 1: Cross-Document N-gram Repetition - S-1 vs 10-K vs ISDA")
     print(f"{'=' * 90}")
 
     MAX_TOKENS = 50000
@@ -173,7 +173,7 @@ def run():
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 90}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens → Generate: {max_tokens}")
         print(f"{'─' * 90}")
 

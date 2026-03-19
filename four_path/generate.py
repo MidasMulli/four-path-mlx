@@ -12,7 +12,7 @@ Adaptive routing per round:
   2. ANE has tokens?    → batch verify ANE drafts
   3. Both miss?         → MTP single-token draft (always available)
 
-MTP is the backstop — it catches tokens when neither pattern matching nor
+MTP is the backstop - it catches tokens when neither pattern matching nor
 neural lookahead fires. It uses the backbone's own hidden states, so it
 has the highest per-token accuracy of any draft source.
 
@@ -360,7 +360,7 @@ def four_path_generate_step(
                 bonus_tok = toks[1]
 
                 if verify_pred.item() == mtp_draft_tok.item():
-                    # Draft accepted — clear rollback
+                    # Draft accepted - clear rollback
                     for c in model_cache:
                         if hasattr(c, "rollback_state") and c.rollback_state is not None:
                             c.rollback_state = None
@@ -413,7 +413,7 @@ def four_path_generate_step(
                     mx.eval(mtp_draft_tok)
                     y = mx.array([verify_pred.item()], mx.uint32)
             else:
-                # No MTP draft pending — generate one
+                # No MTP draft pending - generate one
                 toks, lps, hidden = _step_mtp_backbone(y, n_predict=1)
                 mx.eval(toks)
                 main_tok = toks[0] if toks.ndim > 0 else toks

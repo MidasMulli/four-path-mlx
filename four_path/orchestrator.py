@@ -10,7 +10,7 @@ Key behaviors:
   - Tracks rolling acceptance rate per source (window of last 10 rounds)
   - Throttles sources that fall below acceptance threshold
   - Caps ANE draft batch size based on recent acceptance (don't propose 32
-    tokens if only 17% land — propose 8 instead)
+    tokens if only 17% land - propose 8 instead)
   - Blends sources: N-gram chain as spine, ANE fills remaining slots
   - Tracks cost: each failed verification = 1 wasted forward pass
   - Reports efficiency metrics
@@ -85,13 +85,13 @@ class SourceTracker:
             return base
         rate = self.rolling_acceptance
         if rate > 0.5:
-            return base          # full batch — source is hot
+            return base          # full batch - source is hot
         elif rate > 0.3:
-            return max(16, base)  # decent — keep going
+            return max(16, base)  # decent - keep going
         elif rate > 0.15:
-            return 8              # mediocre — small batches
+            return 8              # mediocre - small batches
         else:
-            return 4              # poor — minimal proposals
+            return 4              # poor - minimal proposals
 
     def record(self, proposed: int, accepted: int):
         self.history.append((proposed, accepted))
@@ -128,7 +128,7 @@ class Orchestrator:
     Adaptive four-path draft orchestrator.
 
     Instead of a fixed cascade, the orchestrator:
-    1. Checks N-gram first (always — it's free)
+    1. Checks N-gram first (always - it's free)
     2. If N-gram fires, optionally extends with ANE tokens (blending)
     3. If N-gram misses, checks ANE with adaptive batch size
     4. If both miss, falls back to MTP
@@ -296,7 +296,7 @@ class Orchestrator:
             print(f"  {name:<8} {ts['total_proposed']:>10} {ts['total_accepted']:>10} "
                   f"{ts['lifetime_acceptance']:>9.0%} {ts['tokens_per_pass']:>9.1f} "
                   f"{ts['recommended_batch']:>8} {'YES' if ts['throttled'] else 'no':>10}")
-        print(f"  {'gpu':<8} {'—':>10} {s['gpu_only_tokens']:>10}")
+        print(f"  {'gpu':<8} {'-':>10} {s['gpu_only_tokens']:>10}")
 
 
 # ── Orchestrated Generate Step ────────────────────────────────

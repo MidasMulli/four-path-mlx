@@ -2,11 +2,11 @@
 """
 Stress Test: Answering the hard questions about four-path speculative decoding.
 
-1. Is 4x just copy-paste? — Measure edit distance between output and reference
-2. Does speedup hold at 2048 tokens? — Test at 256, 512, 1024, 2048
-3. What are the rejection rates? — Track proposals vs acceptances per source
-4. Is MTP correct? — Verify MTP-accepted tokens match standard generation
-5. Are benchmarks diverse enough? — Test on genuinely different task types
+1. Is 4x just copy-paste? - Measure edit distance between output and reference
+2. Does speedup hold at 2048 tokens? - Test at 256, 512, 1024, 2048
+3. What are the rejection rates? - Track proposals vs acceptances per source
+4. Is MTP correct? - Verify MTP-accepted tokens match standard generation
+5. Are benchmarks diverse enough? - Test on genuinely different task types
 
 Usage:
     ~/.mlx-env/bin/python benchmark_stress.py
@@ -296,9 +296,9 @@ def test_mtp_correctness(model, tokenizer):
 # ═══════════════════════════════════════════════════════════════════
 
 def test_diversity(model, tokenizer, ane_ok):
-    """Test on genuinely different task types — not just document drafting."""
+    """Test on genuinely different task types - not just document drafting."""
     print(f"\n{'=' * 90}")
-    print("TEST 5: Task Diversity — Non-Drafting Tasks")
+    print("TEST 5: Task Diversity - Non-Drafting Tasks")
     print("  Does four-path help on tasks that AREN'T document generation?")
     print(f"{'=' * 90}")
 

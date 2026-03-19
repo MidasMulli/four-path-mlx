@@ -53,7 +53,7 @@ class NgramPredictor:
     Lookup: given last n tokens, predict the next one.
 
     Uses flat array with LCG hashing. Collisions overwrite silently.
-    This is intentional — keeps O(1) constant time, constant memory.
+    This is intentional - keeps O(1) constant time, constant memory.
     """
 
     def __init__(self, n: int = 12, table_size: int = 4 * 1024 * 1024):

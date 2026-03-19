@@ -2,7 +2,7 @@
 """
 10-K Filing Benchmark: Four-Path Speculative Decoding on SEC Filings
 
-Tests the four-path architecture on bank 10-K filings — highly structured
+Tests the four-path architecture on bank 10-K filings - highly structured
 regulatory documents with massive boilerplate overlap across companies.
 
 Two phases:
@@ -65,7 +65,7 @@ def phase1_ngram_analysis(tokenizer):
         print("  ERROR: No 10-K files found")
         return
 
-    # Tokenize all files (truncate to keep manageable — first 50K tokens each)
+    # Tokenize all files (truncate to keep manageable - first 50K tokens each)
     MAX_TOKENS = 50000
     all_docs = []
     for f in files:
@@ -213,7 +213,7 @@ def phase2_four_path(model, tokenizer, ane_ok):
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 90}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens → Generate: {max_tokens}")
         print(f"{'─' * 90}")
 

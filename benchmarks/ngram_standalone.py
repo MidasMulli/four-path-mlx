@@ -6,7 +6,7 @@ Simulates an inference loop: tokenize the document, walk through it token by
 token, feed n-grams into the hash table, and check how often the predicted
 next token matches the actual next token.
 
-This measures the CPU prediction path's hit rate on real legal boilerplate —
+This measures the CPU prediction path's hit rate on real legal boilerplate -
 the foundation for the three-path heterogeneous speculative decoding architecture.
 
 Usage:
@@ -51,7 +51,7 @@ def benchmark_single_document(predictor: NgramPredictor, tokens: list[int]) -> d
     2. Feed the actual n-gram into the table
     3. Track hit rate
 
-    This simulates what happens during real generation — the table is built
+    This simulates what happens during real generation - the table is built
     incrementally from the prompt + generated tokens.
     """
     n = predictor.n
@@ -90,7 +90,7 @@ def benchmark_single_document(predictor: NgramPredictor, tokens: list[int]) -> d
 def benchmark_chain_prediction(predictor: NgramPredictor, tokens: list[int],
                                  chain_interval: int = 100) -> dict:
     """
-    Simulate chain drafting — every `chain_interval` tokens, attempt a
+    Simulate chain drafting - every `chain_interval` tokens, attempt a
     draft chain and measure how many tokens are correct.
     """
     n = predictor.n
@@ -137,7 +137,7 @@ def benchmark_chain_prediction(predictor: NgramPredictor, tokens: list[int],
 def benchmark_cross_document(predictor: NgramPredictor, all_tokens: list[list[int]]) -> dict:
     """
     Feed documents 1..N-1 into the table, then predict on document N.
-    Measures cross-document pattern transfer — how much boilerplate
+    Measures cross-document pattern transfer - how much boilerplate
     repeats across different ISDA agreements.
     """
     n = predictor.n
@@ -190,7 +190,7 @@ def run_benchmarks():
     # =========================================================
     print("=" * 70)
     print("BENCHMARK 1: Single-Document Token Prediction")
-    print("  Simulates inference — table builds incrementally as tokens are processed")
+    print("  Simulates inference - table builds incrementally as tokens are processed")
     print("=" * 70)
 
     n_values = [4, 6, 8, 12, 16, 24]

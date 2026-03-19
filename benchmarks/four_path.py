@@ -165,7 +165,7 @@ def run():
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 100}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens → Generate: {max_tokens}")
         print(f"{'─' * 100}")
 

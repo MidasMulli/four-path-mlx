@@ -166,7 +166,7 @@ def build_tasks(filings: dict) -> list:
     """Build the five benchmark tasks from loaded filings."""
     tasks = []
 
-    # Task 1: Single filing analysis — JPM Risk Factors
+    # Task 1: Single filing analysis - JPM Risk Factors
     jpm_risks = extract_section(filings["JPM"], "Risk Factors", max_chars=12000)
     tasks.append({
         "name": "T1: Single Filing Analysis",
@@ -186,7 +186,7 @@ def build_tasks(filings: dict) -> list:
         "max_tokens": 1024,
     })
 
-    # Task 2: Cross-company comparison — JPM vs GS vs ZION
+    # Task 2: Cross-company comparison - JPM vs GS vs ZION
     gs_risks = extract_section(filings["GS"], "Risk Factors", max_chars=8000)
     zion_risks = extract_section(filings["ZION"], "Risk Factors", max_chars=8000)
     tasks.append({
@@ -208,7 +208,7 @@ def build_tasks(filings: dict) -> list:
         "max_tokens": 1024,
     })
 
-    # Task 3: Adversarial analysis — Reddit S-1
+    # Task 3: Adversarial analysis - Reddit S-1
     rddt_business = extract_section(filings.get("RDDT", ""), "Business", max_chars=6000)
     rddt_risks = extract_section(filings.get("RDDT", ""), "Risk Factors", max_chars=8000)
     tasks.append({
@@ -231,7 +231,7 @@ def build_tasks(filings: dict) -> list:
         "max_tokens": 1024,
     })
 
-    # Task 4: Document drafting from reference — GS MD&A
+    # Task 4: Document drafting from reference - GS MD&A
     gs_mda = extract_section(filings["GS"], "Management.s Discussion and Analysis", max_chars=12000)
     if len(gs_mda) < 1000:
         gs_mda = extract_section(filings["GS"], "Discussion and Analysis", max_chars=12000)
@@ -256,13 +256,13 @@ def build_tasks(filings: dict) -> list:
                 "- CET1 ratio: 11.3%\n"
                 "- NPL ratio increased from 0.8% to 1.2%\n\n"
                 "Match the tone, structure, and level of detail of the Goldman reference. "
-                "This is the headline section of the 10-K — it needs to read like a real filing."
+                "This is the headline section of the 10-K - it needs to read like a real filing."
             )},
         ],
         "max_tokens": 2048,
     })
 
-    # Task 5: Batch classification — 10 risk factors from 5 banks
+    # Task 5: Batch classification - 10 risk factors from 5 banks
     risk_factors = []
     for ticker in ["JPM", "GS", "ZION", "BAC"]:
         if ticker in filings and filings[ticker]:
@@ -358,7 +358,7 @@ def check_server(base_url: str, name: str) -> bool:
 
 
 def run_benchmark():
-    # Single server URL — we'll run stock first, then four-path, sequentially
+    # Single server URL - we'll run stock first, then four-path, sequentially
     SERVER_URL = "http://127.0.0.1:8899"
 
     print("=" * 100)
@@ -384,7 +384,7 @@ def run_benchmark():
         print(f"  Stock baseline at: {STOCK_URL}")
     else:
         print("  No stock baseline (set STOCK_URL=http://... to enable)")
-        print("  Running four-path only — will compare against known baseline (~21 tok/s)\n")
+        print("  Running four-path only - will compare against known baseline (~21 tok/s)\n")
 
     # Fetch filings
     print("\nFetching SEC filings from EDGAR...")
@@ -392,7 +392,7 @@ def run_benchmark():
     for ticker in ["JPM", "GS", "ZION", "RDDT", "BAC"]:
         filings[ticker] = load_filing(ticker)
         if not filings[ticker]:
-            print(f"  WARNING: Failed to fetch {ticker} — tasks using it will be degraded")
+            print(f"  WARNING: Failed to fetch {ticker} - tasks using it will be degraded")
 
     # Build tasks
     print("\nBuilding benchmark tasks...")
@@ -482,7 +482,7 @@ def run_benchmark():
         src = fp.get("sources", {})
         total = fp.get("completion_tokens", 0)
         drafted = sum(src.get(k, 0) for k in ["ngram", "mtp", "ane"])
-        draft_pct = f"{drafted/total*100:.0f}%" if total else "—"
+        draft_pct = f"{drafted/total*100:.0f}%" if total else "-"
         stock_tps = st.get("tok_per_sec", 0)
         fp_tps = fp.get("tok_per_sec", 0)
 

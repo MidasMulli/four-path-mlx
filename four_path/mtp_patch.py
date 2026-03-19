@@ -1,5 +1,5 @@
 """
-MTP Patch — Bolt MTP (Multi-Token Prediction) onto a stock mlx-lm Qwen3.5 model.
+MTP Patch - Bolt MTP (Multi-Token Prediction) onto a stock mlx-lm Qwen3.5 model.
 
 Loads MTP weights from a separate safetensors file and patches the model with:
   - model.language_model.mtp (MTPModule)

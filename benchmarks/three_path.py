@@ -227,7 +227,7 @@ def run():
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 90}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens, Generate: {max_tokens} tokens")
         print(f"{'─' * 90}")
 
@@ -241,7 +241,7 @@ def run():
         ngram = bench_ngram(model, tokenizer, prompt_tokens, max_tokens, ngram_n=8)
         ng_speedup = ngram["tok_per_sec"] / std["tok_per_sec"]
         print(f"        {ngram['tokens']} tokens, {ngram['tok_per_sec']:.1f} tok/s "
-              f"({ng_speedup:.2f}x) — {ngram['draft_ratio']:.0%} drafted")
+              f"({ng_speedup:.2f}x) - {ngram['draft_ratio']:.0%} drafted")
 
         # 3. Three-path
         print(f"  [3/3] Three-Path (CPU + ANE + GPU)...")
@@ -298,9 +298,9 @@ def run():
               f"{r['three_path']['ane_accepted']:>10}")
 
     print(f"\n  Processor roles:")
-    print(f"    CPU  — N-gram hash table: catches verbatim boilerplate patterns")
-    print(f"    ANE  — 1.7B neural lookahead: catches semantic predictions")
-    print(f"    GPU  — 9B verification + novel token generation")
+    print(f"    CPU  - N-gram hash table: catches verbatim boilerplate patterns")
+    print(f"    ANE  - 1.7B neural lookahead: catches semantic predictions")
+    print(f"    GPU  - 9B verification + novel token generation")
 
     # Save
     out_path = Path(__file__).parent / "three_path_results.json"

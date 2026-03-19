@@ -14,7 +14,7 @@ Architecture:
      - ANE lookahead (semantic predictions the N-gram misses)
   4. Draft tokens are merged: N-gram first (free), ANE fills gaps
 
-The ANE generates at 57 tok/s vs GPU's 25 tok/s — it's always ahead.
+The ANE generates at 57 tok/s vs GPU's 25 tok/s - it's always ahead.
 Both draft sources produce tokens during time the GPU would otherwise waste.
 """
 
@@ -158,9 +158,9 @@ class ThreePathDrafter:
     Merges draft tokens from CPU (N-gram) and ANE (neural lookahead).
 
     Priority:
-    1. N-gram match (if available) — highest confidence, verbatim patterns
-    2. ANE lookahead (if available) — semantic predictions
-    3. No draft — GPU generates normally
+    1. N-gram match (if available) - highest confidence, verbatim patterns
+    2. ANE lookahead (if available) - semantic predictions
+    3. No draft - GPU generates normally
 
     Tracks which source each draft came from for analysis.
     """
@@ -212,12 +212,12 @@ class ThreePathDrafter:
         )
 
         if ngram_chain:
-            # N-gram produced a chain — use it
+            # N-gram produced a chain - use it
             draft_tokens = ngram_chain
             sources = ["ngram"] * len(ngram_chain)
             self.ngram_drafted += len(ngram_chain)
         else:
-            # N-gram missed — try ANE lookahead
+            # N-gram missed - try ANE lookahead
             if self.ane_lookahead and tokenizer:
                 if not self.ane_lookahead.is_ready():
                     self.ane_lookahead.wait(timeout=0.01)  # brief wait
@@ -342,7 +342,7 @@ def three_path_generate_step(
     prompt_tokens = prompt.tolist()
     drafter.feed_prompt(prompt_tokens)
 
-    # First token — always from GPU
+    # First token - always from GPU
     tokens, logprobs = _step(y)
     mx.eval(tokens, logprobs)
     first_token = tokens.item() if tokens.ndim == 0 else tokens.tolist()[-1]
@@ -361,7 +361,7 @@ def three_path_generate_step(
         draft_tokens, sources = drafter.draft(num_draft, tokenizer=tokenizer)
 
         if not draft_tokens:
-            # No drafts from either source — single GPU token
+            # No drafts from either source - single GPU token
             tokens, logprobs = _step(y)
             mx.eval(tokens, logprobs)
             tok = tokens.item() if tokens.ndim == 0 else tokens.tolist()[-1]

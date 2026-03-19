@@ -117,7 +117,7 @@ from four_path.mtp_patch import patch_mtp
 
 model, tokenizer = load("mlx-community/Qwen3.5-9B-MLX-4bit")
 patch_mtp(model, "~/models/Qwen3.5-9B-MLX-4bit-MTP")
-# model now has mtp_forward() — four_path_generate_step uses it automatically
+# model now has mtp_forward() - four_path_generate_step uses it automatically
 ```
 
 MTP weights are from the Qwen3.5-9B model's own MTP heads, converted via mlx-lm. The patch loads them at runtime onto stock mlx-lm without needing any fork.
@@ -153,7 +153,7 @@ On 64GB M5 Pro with a 70B target model, verification cost increases from ~50ms t
 
 ## Prior work
 
-- [orion-ane](https://github.com/MidasMulli/orion-ane) — Three-tier architecture (CPU extraction + ANE enrichment + GPU reasoning), persistent ANE server, memory daemon
+- [orion-ane](https://github.com/MidasMulli/orion-ane) - Three-tier architecture (CPU extraction + ANE enrichment + GPU reasoning), persistent ANE server, memory daemon
 - N-gram hash table based on llama.cpp's ngram-mod algorithm (LCG hash, 4M entries)
 - MTP heads from [ml-explore/mlx-lm PR #990](https://github.com/ml-explore/mlx-lm/pull/990) (AirRunner), loaded at runtime via `mtp_patch.py`
 

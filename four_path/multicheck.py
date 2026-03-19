@@ -4,7 +4,7 @@ Multi-Check Four-Path Speculative Decoding
 
 Key insight: when the primary draft source is rejected, the verification
 forward pass already produced the target's token. Checking if alternative
-sources predicted that same token is a nanosecond lookup — not another
+sources predicted that same token is a nanosecond lookup - not another
 forward pass.
 
 If an alternative source predicted the correct rejection token, it's "in sync"
@@ -141,7 +141,7 @@ class MultiCheckDrafter:
                     sources.extend(["ane"] * len(ane_fill))
                     self.ane_drafted += len(ane_fill)
         else:
-            # No N-gram — use ANE
+            # No N-gram - use ANE
             ane_chain = self.get_ane_chain_from(0, max_tokens, tokenizer)
             if ane_chain:
                 draft_tokens = ane_chain
@@ -157,7 +157,7 @@ class MultiCheckDrafter:
         predicted the target's actual token. Returns the source name if
         found, None otherwise.
 
-        This is a nanosecond lookup — no forward pass needed.
+        This is a nanosecond lookup - no forward pass needed.
         """
         self.multicheck_attempts += 1
 

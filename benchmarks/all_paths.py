@@ -210,7 +210,7 @@ def run():
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 95}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens → Generate: {max_tokens}")
         print(f"{'─' * 95}")
 
@@ -227,7 +227,7 @@ def run():
         print(f"  [2/4] MTP (GPU + MTP head)...")
         mtp = bench_mtp(model, tokenizer, prompt_tokens, max_tokens)
         print(f"        {mtp['tok_per_sec']:.1f} tok/s ({mtp['tok_per_sec']/baseline:.2f}x) "
-              f"— {mtp['draft_ratio']:.0%} from MTP head")
+              f"- {mtp['draft_ratio']:.0%} from MTP head")
         result["mtp"] = {"tok_per_sec": mtp["tok_per_sec"],
                          "speedup": mtp["tok_per_sec"] / baseline,
                          "draft_ratio": mtp["draft_ratio"]}
@@ -236,7 +236,7 @@ def run():
         print(f"  [3/4] N-gram (CPU + GPU)...")
         ng = bench_ngram(model, tokenizer, prompt_tokens, max_tokens, ngram_n=8)
         print(f"        {ng['tok_per_sec']:.1f} tok/s ({ng['tok_per_sec']/baseline:.2f}x) "
-              f"— {ng['draft_ratio']:.0%} from N-gram")
+              f"- {ng['draft_ratio']:.0%} from N-gram")
         result["ngram"] = {"tok_per_sec": ng["tok_per_sec"],
                            "speedup": ng["tok_per_sec"] / baseline,
                            "draft_ratio": ng["draft_ratio"]}
@@ -246,7 +246,7 @@ def run():
             print(f"  [4/4] Three-Path (CPU + ANE + GPU)...")
             tp = bench_three_path(model, tokenizer, prompt_tokens, prompt_text, max_tokens)
             print(f"        {tp['tok_per_sec']:.1f} tok/s ({tp['tok_per_sec']/baseline:.2f}x) "
-                  f"— N-gram={tp['sources'].get('ngram',0)}, ANE={tp['sources'].get('ane',0)}, GPU={tp['sources'].get('gpu',0)}")
+                  f"- N-gram={tp['sources'].get('ngram',0)}, ANE={tp['sources'].get('ane',0)}, GPU={tp['sources'].get('gpu',0)}")
             result["three_path"] = {"tok_per_sec": tp["tok_per_sec"],
                                     "speedup": tp["tok_per_sec"] / baseline,
                                     "sources": tp["sources"]}
@@ -255,7 +255,7 @@ def run():
 
     # ── Summary ───────────────────────────────────────────────
     print(f"\n\n{'=' * 95}")
-    print("SUMMARY — All Paths Compared")
+    print("SUMMARY - All Paths Compared")
     print(f"{'=' * 95}")
     print(f"\n  {'Test':<20} {'Standard':>10} {'MTP':>10} {'N-gram':>10} {'3-Path':>10}  │ {'Best':>10} {'Speedup':>10}")
     print(f"  {'─'*20} {'─'*10} {'─'*10} {'─'*10} {'─'*10}  │ {'─'*10} {'─'*10}")
@@ -274,10 +274,10 @@ def run():
         print(f"  {r['test']:<20} {std_tps:>9.1f} {mtp_tps:>9.1f} {ng_tps:>9.1f} {tp_tps:>9.1f}  │ {best_name:>10} {best_speedup:>9.2f}x")
 
     print(f"\n  Token sources:")
-    print(f"    CPU  N-gram hash — verbatim boilerplate, nanosecond lookup")
-    print(f"    GPU  MTP head    — model's own hidden-state prediction, free with forward pass")
-    print(f"    ANE  1.7B neural — semantic lookahead, parallel generation")
-    print(f"    GPU  Backbone    — 9B verification + novel tokens")
+    print(f"    CPU  N-gram hash - verbatim boilerplate, nanosecond lookup")
+    print(f"    GPU  MTP head    - model's own hidden-state prediction, free with forward pass")
+    print(f"    ANE  1.7B neural - semantic lookahead, parallel generation")
+    print(f"    GPU  Backbone    - 9B verification + novel tokens")
 
     print(f"\n  Note: MTP and N-gram use different generation loops (MTP: 1 draft/round,")
     print(f"        N-gram: chain drafts). Four-path combined = next build.")

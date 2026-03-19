@@ -110,7 +110,7 @@ def run():
         prompt_tokens = tokenizer.encode(prompt_text)
 
         print(f"\n{'─' * 110}")
-        print(f"  {name} — {desc}")
+        print(f"  {name} - {desc}")
         print(f"  Prompt: {len(prompt_tokens):,} tokens → Generate: {max_tokens}")
         print(f"{'─' * 110}")
 
@@ -154,7 +154,7 @@ def run():
             drafter.ane_lookahead.wait(5)
 
         static_summary = drafter.summary()
-        print(f"  Static 4P:    {static_tps:.1f} tok/s ({static_speedup:.2f}x) — "
+        print(f"  Static 4P:    {static_tps:.1f} tok/s ({static_speedup:.2f}x) - "
               f"N={sources_static['ngram']} A={sources_static['ane']} M={sources_static['mtp']} G={sources_static['gpu']}")
         result["static"] = {"tps": static_tps, "speedup": static_speedup, "sources": sources_static}
 
@@ -186,7 +186,7 @@ def run():
 
         orch_summary = orch.summary()
         orch_eff = orch_summary["efficiency"]
-        print(f"  Orchestrated: {orch_tps:.1f} tok/s ({orch_speedup:.2f}x) — "
+        print(f"  Orchestrated: {orch_tps:.1f} tok/s ({orch_speedup:.2f}x) - "
               f"N={sources_orch['ngram']} A={sources_orch['ane']} M={sources_orch['mtp']} G={sources_orch['gpu']} "
               f"| {orch_eff:.1f} tok/pass")
         result["orchestrated"] = {
