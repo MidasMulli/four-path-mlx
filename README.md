@@ -21,7 +21,7 @@ On domain-specific text, most of what an LLM generates is predictable by somethi
 
 ## Results
 
-All benchmarks: MacBook Air M5, 16GB unified memory, macOS 26.3 (Tahoe). Model: Qwen3.5-9B-MLX-4bit via MLX 0.31.1. Baseline: ~21 tok/s on stock mlx-lm with the same model, same prompts, same hardware, greedy decoding. Single-run measurements.
+All benchmarks: MacBook Air M5, 16GB unified memory, macOS 26.3 (Tahoe). Model: Qwen3.5-9B-MLX-4bit via MLX 0.31.1. Baseline: ~21 tok/s on stock mlx-lm with the same model, same prompts, same hardware, greedy decoding. Single-run measurements — expect ±10-15% variance across runs (baseline varies ±2-3 tok/s, speedup ratios shift proportionally).
 
 ### Standalone benchmarks (no agent, no tool calling)
 
@@ -33,9 +33,9 @@ Benchmarked on real SEC filings pulled from EDGAR and ISDA derivatives documenta
 | Cross-Company Comparison | 1,024 | 50.2 | 2.39x | 603 | 0 | 120 | 291 | 72% |
 | Adversarial Critique | 1,024 | 69.6 | 3.31x | 846 | 0 | 39 | 129 | 87% |
 | Document Drafting (10-K MD&A) | 2,048 | 96.6 | 4.60x | 1,907 | 0 | 16 | 115 | 94% |
-| Batch Classification (JSON) | 1,024 | 129.7 | 6.15x | 937 | 0 | 7 | 70 | 93% |
+| Batch Classification (JSON) | 1,024 | 129.7 | 6.15x (best case) | 937 | 0 | 7 | 70 | 93% |
 
-Batch classification achieves 6.15x because structured JSON output repeats field names across entries — N-gram eats the schema repetition. This is a best case, not a typical case.
+Source columns show token counts per source. Totals may be ~1% below stated token count due to initial prompt tokens before drafting engages. Batch classification hits 6.15x because structured JSON repeats field names across entries — N-gram eats the schema repetition. This is a best case, not a typical case.
 
 ### Agent with tool calling (real-world usage)
 
@@ -64,11 +64,13 @@ The key hardware insight: verifying N draft tokens costs nearly the same as veri
 | Draft tokens (N) | Verify time (ms) |
 |-------------------|-------------------|
 | 1 | ~42 |
+| 2 | ~55 |
+| 4 | ~75 |
 | 8 | ~110 |
 | 16 | ~110 |
 | 32 | ~110 |
 
-Wall-clock plateaus at ~110ms from N=8 to N=32. Measured on M5 Air with Qwen3.5-9B-MLX-4bit. This means draft quality barely matters for long chains — the marginal cost of checking one more token is near zero once weights are loaded.
+Wall-clock plateaus at ~110ms from N=8 to N=32. Measured on M5 Air with Qwen3.5-9B-MLX-4bit via `benchmarks/all_paths.py`. The ramp from N=1 (42ms) to N=8 (110ms) reflects weight-loading overhead; beyond N=8, NAX processes additional tokens from cached weights at near-zero marginal cost.
 
 ## Architecture
 
@@ -77,24 +79,24 @@ Wall-clock plateaus at ~110ms from N=8 to N=32. Measured on M5 Air with Qwen3.5-
                     │  Prompt      │
                     └──────┬──────┘
                            │
-              ┌────────────┼────────────┐
-              │            │            │
-        ┌─────▼─────┐ ┌───▼───┐ ┌─────▼─────┐
-        │  N-gram   │ │  PLD  │ │    GPU    │
-        │  CPU hash │ │  CPU  │ │  9B + MTP │
-        │  table    │ │lookup │ │  backbone │
-        └─────┬─────┘ └───┬───┘ └─────┬─────┘
-              │            │            │
-              └────────────┼────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Verify    │
-                    │  (GPU 9B)   │
-                    └──────┬──────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Output    │
-                    └─────────────┘
+         ┌─────────────────┼─────────────────┐
+         │            │         │             │
+   ┌─────▼─────┐ ┌───▼───┐ ┌──▼──┐  ┌ ─ ─ ─▼─ ─ ─ ┐
+   │  N-gram   │ │  PLD  │ │ GPU │    ANE (0.8B)
+   │  CPU hash │ │  CPU  │ │ MTP │  │  optional,   │
+   │  table    │ │lookup │ │head │    same-family
+   └─────┬─────┘ └───┬───┘ └──┬──┘  └ ─ ─ ─┬─ ─ ─ ┘
+         │            │        │             │
+         └────────────┼────────┴─────────────┘
+                      │
+               ┌──────▼──────┐
+               │   Verify    │
+               │  (GPU 9B)   │
+               └──────┬──────┘
+                      │
+               ┌──────▼──────┐
+               │   Output    │
+               └─────────────┘
 ```
 
 ## Quick start
@@ -179,9 +181,13 @@ Benchmark prompts are included in `benchmarks/samples/` (ISDA Master Agreements,
 
 ## ANE draft source (experimental)
 
-The architecture supports an ANE draft path (1.7B Qwen3 on CoreML). However, the ANE draft model uses a different tokenizer (Qwen3 151K vocab vs Qwen3.5 248K vocab), which causes token boundary misalignment in per-round speculative decoding. Measured 60% acceptance under teacher-forcing but 0% in autoregressive token-level matching due to the cross-vocab issue.
+The architecture supports an ANE draft path but cross-tokenizer models don't work for speculative decoding:
 
-A same-family model ([gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — Qwen3.5-0.8B on ANE) achieves 56-70% teacher-forcing acceptance with the correct tokenizer. On M5 Air 16GB, it runs at 0.94x (near break-even) because the 0.8B is only 1.75x faster than the 9B — insufficient speed ratio. On 64GB Pro hardware with a 70B target (~200ms/tok), the 0.8B at 24ms/tok gives an 8x speed ratio, in the spec decode sweet spot.
+**Cross-family (Qwen3 1.7B, 151K vocab → Qwen3.5 9B, 248K vocab):** 60% teacher-forcing acceptance, but 0% autoregressive acceptance. The different tokenizers cause token boundary misalignment — same text produces different token counts, breaking cache synchronization between draft and target. This is structural, not an implementation bug.
+
+**Same-family ([gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — Qwen3.5-0.8B, same 248K vocab):** 56-70% teacher-forcing acceptance, 37-59% autoregressive acceptance (varies by prompt type). The tokenizer matches, so cache sync works. However, on M5 Air 16GB the 0.8B at 24ms/tok is only 1.75x faster than the 9B at 42ms/tok — insufficient speed ratio for speculative decoding to break even. Measured 0.94x wallclock (slower than baseline).
+
+**On 64GB Pro with 70B target:** 0.8B at 24ms/tok vs 70B at ~200ms/tok = 8x speed ratio, in the spec decode sweet spot. The converter was built for this configuration.
 
 ## Future work
 
