@@ -1,0 +1,203 @@
+================================================================================
+GATE ZERO: Statistical Validation of K=32 Batch Verification
+Date: 2026-03-21 15:56:22
+Model: mlx-community/Qwen3.5-9B-MLX-4bit
+Runs per K: 20
+================================================================================
+Loading model: mlx-community/Qwen3.5-9B-MLX-4bit
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files: 100%|██████████| 11/11 [00:00<00:00, 161885.42it/s]
+Model loaded in 2.1s
+N-gram corpus: 8 files, 87,021 tokens
+Warming up model...
+Warmup done.
+
+
+================================================================================
+TEST 2: Baseline Single-Token Generation (10 runs)
+================================================================================
+
+  Mean: 23.0 tok/s  Std: 0.4  Min: 22.5  Max: 23.8  (n=10)
+
+================================================================================
+TEST 1: Verification Wall Time vs K (20 runs per K)
+================================================================================
+
+  [ISDA_clause] Explain what an ISDA Master Agreement is and its key pr...
+    K= 1: mean=  39.1ms  std=  2.6ms  min= 36.8ms  max= 49.2ms  (n=20)
+    K= 4: mean=  71.7ms  std=  0.6ms  min= 71.1ms  max= 73.0ms  (n=20)
+    K= 8: mean= 147.2ms  std=  0.9ms  min=146.5ms  max=149.8ms  (n=20)
+    K=16: mean= 116.0ms  std=  1.3ms  min=113.9ms  max=118.3ms  (n=20)
+    K=24: mean= 120.0ms  std=  0.8ms  min=118.8ms  max=122.0ms  (n=20)
+    K=32: mean= 113.5ms  std=  1.4ms  min=112.3ms  max=118.6ms  (n=20)
+
+  [CSA_draft] Draft a credit support annex paragraph for initial marg...
+    K= 1: mean=  38.5ms  std=  2.2ms  min= 36.9ms  max= 46.3ms  (n=20)
+    K= 4: mean=  73.3ms  std=  1.7ms  min= 71.5ms  max= 76.2ms  (n=20)
+    K= 8: mean= 150.8ms  std=  3.4ms  min=147.0ms  max=157.9ms  (n=20)
+    K=16: mean= 125.5ms  std= 15.8ms  min=114.5ms  max=160.2ms  (n=20)
+    K=24: mean= 122.5ms  std=  9.3ms  min=119.0ms  max=161.7ms  (n=20)
+    K=32: mean= 125.9ms  std= 16.4ms  min=113.1ms  max=157.7ms  (n=20)
+
+  [general] What is the weather like in Dallas Texas today...
+    K= 1: mean=  40.5ms  std=  3.6ms  min= 36.5ms  max= 47.5ms  (n=20)
+    K= 4: mean=  84.2ms  std= 18.8ms  min= 71.6ms  max=143.7ms  (n=20)
+    K= 8: mean= 150.8ms  std= 10.4ms  min=147.0ms  max=194.9ms  (n=20)
+    K=16: mean= 115.1ms  std=  0.7ms  min=114.2ms  max=116.9ms  (n=20)
+    K=24: mean= 120.0ms  std=  0.6ms  min=119.2ms  max=121.2ms  (n=20)
+    K=32: mean= 114.0ms  std=  0.8ms  min=112.8ms  max=115.3ms  (n=20)
+
+  [code] Write a Python function to sort a list of dictionaries ...
+    K= 1: mean=  37.2ms  std=  0.7ms  min= 36.5ms  max= 38.8ms  (n=20)
+    K= 4: mean=  71.4ms  std=  0.2ms  min= 71.2ms  max= 72.1ms  (n=20)
+    K= 8: mean= 148.5ms  std=  5.0ms  min=146.5ms  max=169.2ms  (n=20)
+    K=16: mean= 114.5ms  std=  0.4ms  min=113.9ms  max=115.2ms  (n=20)
+    K=24: mean= 118.9ms  std=  0.5ms  min=118.4ms  max=120.2ms  (n=20)
+    K=32: mean= 121.5ms  std= 11.9ms  min=112.1ms  max=150.7ms  (n=20)
+
+  [ISDA_compare] Summarize the key differences between the 1992 and 2002...
+    K= 1: mean=  41.0ms  std=  6.1ms  min= 36.8ms  max= 64.5ms  (n=20)
+    K= 4: mean=  91.6ms  std= 10.2ms  min= 72.0ms  max=108.5ms  (n=20)
+    K= 8: mean= 150.9ms  std=  4.6ms  min=147.0ms  max=162.5ms  (n=20)
+    K=16: mean= 116.2ms  std=  1.2ms  min=114.8ms  max=118.9ms  (n=20)
+    K=24: mean= 120.1ms  std=  0.7ms  min=119.2ms  max=121.2ms  (n=20)
+    K=32: mean= 113.3ms  std=  0.6ms  min=112.6ms  max=114.5ms  (n=20)
+
+────────────────────────────────────────────────────────────────────────────────
+SUMMARY: Verification Wall Time (all prompts combined)
+────────────────────────────────────────────────────────────────────────────────
+
+   K |  Mean (ms) |   Std (ms) |   Min (ms) |   Max (ms) |    n
+─────────────────────────────────────────────────────────────────
+   1 |       39.3 |        3.7 |       36.5 |       64.5 |  100
+   4 |       78.4 |       12.4 |       71.1 |      143.7 |  100
+   8 |      149.7 |        5.9 |      146.5 |      194.9 |  100
+  16 |      117.5 |        8.1 |      113.9 |      160.2 |  100
+  24 |      120.3 |        4.3 |      118.4 |      161.7 |  100
+  32 |      117.7 |       10.3 |      112.1 |      157.7 |  100
+
+PLATEAU TEST:
+  K=16:  117.5ms  (1.000x of K=16)
+  K=24:  120.3ms  (1.024x of K=16)
+  K=32:  117.7ms  (1.002x of K=16)
+  CONFIRMED: K=32/K=16 = 1.002x (<1.15x)
+
+  K=8 INVERSION CONFIRMED: 149.7ms > K=16 117.5ms
+  Ratio: K=8/K=16 = 1.274x
+
+THROUGHPUT CEILING (100% acceptance):
+  K= 1:     25 tok/s
+  K= 4:     51 tok/s
+  K= 8:     53 tok/s
+  K=16:    136 tok/s
+  K=24:    199 tok/s
+  K=32:    272 tok/s
+
+================================================================================
+TEST 3: Autoregressive N-gram Acceptance (NOT teacher-forcing)
+  Methodology: generate tokens → build N-gram from generated → draft → verify
+================================================================================
+
+  [events_of_default] List all the standard events of default in an ISDA Master Ag...
+    Generated 500 tokens in 21.7s (23.1 tok/s)
+    WARM N-gram: 21 chains tested
+      Median acceptance: 6.2%
+      Min: 0.0%  Max: 100.0%
+      Mean: 20.7%  Std: 28.3%
+    COLD N-gram: 1 chains tested
+      Median acceptance: 5.0%
+      Min: 5.0%  Max: 5.0%
+
+  [csa_full] Draft a complete Credit Support Annex with all standard prov...
+    Generated 500 tokens in 21.6s (23.1 tok/s)
+    WARM N-gram: 21 chains tested
+      Median acceptance: 31.2%
+      Min: 0.0%  Max: 100.0%
+      Mean: 39.1%  Std: 36.7%
+    COLD N-gram: 0 chains
+
+  [isda_comparison] Write a detailed comparison of the 1992 and 2002 ISDA Master...
+    Generated 500 tokens in 21.7s (23.1 tok/s)
+    WARM N-gram: 21 chains tested
+      Median acceptance: 0.0%
+      Min: 0.0%  Max: 59.4%
+      Mean: 11.9%  Std: 19.7%
+    COLD N-gram: 0 chains
+
+  [netting_provisions] Draft the netting provisions section of an ISDA Master Agree...
+    Generated 500 tokens in 21.8s (23.0 tok/s)
+    WARM N-gram: 21 chains tested
+      Median acceptance: 22.2%
+      Min: 0.0%  Max: 100.0%
+      Mean: 34.7%  Std: 35.5%
+    COLD N-gram: 0 chains
+
+  [termination_events] List and explain all termination events under the 2002 ISDA ...
+    Generated 500 tokens in 21.5s (23.2 tok/s)
+    WARM N-gram: 21 chains tested
+      Median acceptance: 9.4%
+      Min: 0.0%  Max: 100.0%
+      Mean: 28.4%  Std: 35.2%
+    COLD N-gram: 0 chains
+
+────────────────────────────────────────────────────────────────────────────────
+ACCEPTANCE SUMMARY TABLE
+────────────────────────────────────────────────────────────────────────────────
+
+Prompt Type          | Count |  Median |     Min |     Max | Condition
+──────────────────────────────────────────────────────────────────────
+events_of_default    |    21 |   6.2% |   0.0% | 100.0% |      warm
+events_of_default    |     1 |   5.0% |   5.0% |   5.0% |      cold
+csa_full             |    21 |  31.2% |   0.0% | 100.0% |      warm
+isda_comparison      |    21 |   0.0% |   0.0% |  59.4% |      warm
+netting_provisions   |    21 |  22.2% |   0.0% | 100.0% |      warm
+termination_events   |    21 |   9.4% |   0.0% | 100.0% |      warm
+
+================================================================================
+TEST 4: Wall-Clock tok/s with Speculative Decode (Warm N-gram)
+  Full autoregressive spec decode: draft → verify → accept/reject → repeat
+================================================================================
+
+  CSA Draft (K=32, warm N-gram):
+    Tokens generated: 525
+    Wall-clock time:  3.65s
+    Effective tok/s:  143.9
+    Rounds:           45
+    Sources:          N-gram=479  GPU=45
+    Draft acceptance: 91.2% of tokens from N-gram
+
+================================================================================
+TEST 5: Reconciliation — K=32 Plateau vs Full-Model Cost
+================================================================================
+
+  Baseline single-token cost: 43.5ms (23.0 tok/s)
+
+  Verification costs:
+    K= 1:   39.3ms = 0.90x single-token cost  | amortized: 19.6ms/tok (100% acceptance)
+    K= 4:   78.4ms = 1.80x single-token cost  | amortized: 15.7ms/tok (100% acceptance)
+    K= 8:  149.7ms = 3.44x single-token cost  | amortized: 16.6ms/tok (100% acceptance)
+    K=16:  117.5ms = 2.70x single-token cost  | amortized: 6.9ms/tok (100% acceptance)
+    K=24:  120.3ms = 2.77x single-token cost  | amortized: 4.8ms/tok (100% acceptance)
+    K=32:  117.7ms = 2.71x single-token cost  | amortized: 3.6ms/tok (100% acceptance)
+
+  WHY K=32 plateau at ~118ms but single token is ~43ms:
+    Single token: load all weights ONCE, process 1 token = 43.5ms
+    K=1 verify:   load all weights ONCE, process 2 tokens = 39.3ms
+    K=32 verify:  load all weights ONCE, process 33 tokens = 117.7ms
+    The weight load dominates. Extra tokens ride the same memory fetch.
+
+  K=32/K=1 ratio:      2.99x (33 tokens costs 3.0x of 2 tokens)
+  K=32/single-token:   2.71x
+  Theoretical ceiling: 272 tok/s at 100% acceptance
+  Realistic ceiling:   136 tok/s at 50% acceptance
+
+================================================================================
+GATE ZERO VERDICT
+================================================================================
+  [PASS] Plateau: K=32/K=16 = 1.002x (<1.15x)
+  [PASS] K=8 inversion: 149.7ms > 117.5ms
+  [PASS] Warm acceptance median: 12.5%
+  [PASS] CSA wall-clock: 143.9 tok/s (6.26x baseline)
+
+  GATE ZERO PASSED — all numbers validated.
+
+  Raw data saved to /Users/midas/Desktop/cowork/ngram-engine/gate_zero_results.json

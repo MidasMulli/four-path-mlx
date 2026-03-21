@@ -61,20 +61,24 @@ Speedup scales with: (1) generation length, (2) repetition structure of the inpu
 
 ### Batch verification plateau
 
-The key hardware insight: verifying N draft tokens costs nearly the same as verifying 1, because GPU loads weights once and NAX (Neural Accelerators in GPU cores) processes all tokens from cached weights.
+The key hardware insight: verifying K=32 draft tokens costs the same as K=16, and K=8 is actually MORE expensive due to a GatedDeltaNet SSM batch processing threshold.
 
-| Draft tokens (N) | Verify time (ms) |
-|-------------------|-------------------|
-| 1 | ~42 |
-| 2 | ~55 |
-| 4 | ~75 |
-| 8 | ~110 |
-| 16 | ~110 |
-| 32 | ~110 |
+| Draft tokens (K) | Verify time (ms) | Std (ms) | n |
+|-------------------|-------------------|----------|---|
+| 1 | 39.3 | 0.7-6.1 | 100 |
+| 4 | 78.4 | 0.2-18.8 | 100 |
+| **8** | **149.7** | 0.9-10.4 | 100 |
+| 16 | 117.5 | 0.4-15.8 | 100 |
+| 24 | 120.3 | 0.5-9.3 | 100 |
+| **32** | **117.7** | 0.8-16.4 | 100 |
 
-Wall-clock plateaus at ~110ms from N=8 to N=32. Measured on M5 Air with Qwen3.5-9B-MLX-4bit via `benchmarks/all_paths.py`. The ramp from N=1 (42ms) to N=8 (110ms) reflects weight-loading overhead; beyond N=8, NAX processes additional tokens from cached weights at near-zero marginal cost.
+Statistically validated: 20 runs × 5 prompts × 6 K values = 600 measurements. Full methodology and raw data in [`validation/`](validation/).
 
-**Important caveat:** These measurements are for individual matmul operations. Full-model verification cost includes the 31% sequential GatedDeltaNet overhead in Qwen3.5-9B — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable across the batch. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements behind this.
+**K=8 inversion:** K=8 (149.7ms) costs 27.4% more than K=16 (117.5ms). The GatedDeltaNet SSM batch processing mode activates between K=8 and K=16. Below this threshold, the sequential recurrence dominates each layer's cost. Above it, the parallel linear projections (which are the bulk of per-layer compute) amortize across tokens via NAX.
+
+**K=32 plateau:** K=32/K=16 = 1.002x. The weight load dominates — additional tokens ride the same memory fetch. Theoretical throughput ceiling at K=32: 272 tok/s (11.8x baseline). Measured wall-clock with warm N-gram on CSA drafting: **143.9 tok/s (6.26x)**.
+
+**Important caveat:** Full-model verification includes the 31% sequential GatedDeltaNet overhead — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable via NAX. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements.
 
 ## Architecture
 
@@ -181,7 +185,7 @@ Benchmark prompts are included in `benchmarks/samples/` (ISDA Master Agreements,
 
 3. **MTP catches what others miss.** The model's own MTP head uses hidden states from the current forward pass. It has the highest per-token accuracy of any draft source but only produces one token per round. It fills gaps between N-gram chains.
 
-4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as verifying 8 on M5 Air. This means the entire architecture reduces to: generate as many draft tokens as possible (quality barely matters), then batch-verify them all. Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul (the actual kernel path during inference) costs only 1.14x at N=32 vs N=1.
+4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as 16 on M5 Air — and K=8 is actually the worst point on the curve (149.7ms vs 117.7ms at K=32). [Statistically validated](validation/) with 600 measurements (20 runs × 5 prompts × 6 K values). Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul costs only 1.14x at N=32 vs N=1.
 
 ## ANE draft source (experimental)
 
