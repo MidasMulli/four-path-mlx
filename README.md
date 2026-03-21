@@ -57,6 +57,8 @@ Speedup scales with: (1) generation length, (2) repetition structure of the inpu
 
 **Not copy-paste:** 0% verbatim overlap between generated output and reference documents (verified via SequenceMatcher). The model generates novel text. The draft sources just predict what it's going to say.
 
+**Qwen3.5-9B is a hybrid model** — every layer contains a GatedDeltaNet SSM (31% of per-layer compute) that processes tokens sequentially. This partially explains the 0.96x floor on code generation: when draft acceptance is low, the sequential SSM cost dominates and verification overhead exceeds the savings. Pure attention models would have a higher floor because their verification is fully parallelizable via NAX.
+
 ### Batch verification plateau
 
 The key hardware insight: verifying N draft tokens costs nearly the same as verifying 1, because GPU loads weights once and NAX (Neural Accelerators in GPU cores) processes all tokens from cached weights.
@@ -71,6 +73,8 @@ The key hardware insight: verifying N draft tokens costs nearly the same as veri
 | 32 | ~110 |
 
 Wall-clock plateaus at ~110ms from N=8 to N=32. Measured on M5 Air with Qwen3.5-9B-MLX-4bit via `benchmarks/all_paths.py`. The ramp from N=1 (42ms) to N=8 (110ms) reflects weight-loading overhead; beyond N=8, NAX processes additional tokens from cached weights at near-zero marginal cost.
+
+**Important caveat:** These measurements are for individual matmul operations. Full-model verification cost includes the 31% sequential GatedDeltaNet overhead in Qwen3.5-9B — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable across the batch. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements behind this.
 
 ## Architecture
 
@@ -177,7 +181,7 @@ Benchmark prompts are included in `benchmarks/samples/` (ISDA Master Agreements,
 
 3. **MTP catches what others miss.** The model's own MTP head uses hidden states from the current forward pass. It has the highest per-token accuracy of any draft source but only produces one token per round. It fills gaps between N-gram chains.
 
-4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as verifying 8 on M5 Air. This means the entire architecture reduces to: generate as many draft tokens as possible (quality barely matters), then batch-verify them all.
+4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as verifying 8 on M5 Air. This means the entire architecture reduces to: generate as many draft tokens as possible (quality barely matters), then batch-verify them all. Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul (the actual kernel path during inference) costs only 1.14x at N=32 vs N=1.
 
 ## ANE draft source (experimental)
 
@@ -208,8 +212,9 @@ Built and tested on MacBook Air M5, 16GB unified memory, 10 GPU cores, macOS 26.
 
 ## Related
 
-- [orion-ane](https://github.com/MidasMulli/orion-ane) — ANE training + persistent memory daemon + agent framework
+- [orion-ane](https://github.com/MidasMulli/orion-ane) — ANE training + persistent memory daemon + agent framework + [NAX hardware probe](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md)
 - [gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — GatedDeltaNet SSM to CoreML converter (same-family ANE draft source)
+- [ane-perf](https://github.com/MidasMulli/ane-perf) — ANE hardware performance characterization via IOReport bandwidth histograms
 - [dual-path-inference](https://github.com/MidasMulli/dual-path-inference) — Initial GPU+ANE concurrency proof-of-concept (archived)
 
 ## License
