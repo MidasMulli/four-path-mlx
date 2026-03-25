@@ -260,8 +260,17 @@ class CascadingNgramPredictor:
             pass  # Start fresh if load fails
 
     def feed_file(self, filepath, tokenizer):
-        """Feed a text file into the N-gram table."""
+        """Feed a text file into the N-gram table, stripping markup."""
+        import re
         text = Path(filepath).read_text()
+        # Strip Obsidian wiki-links: [[Page|Display]] → Display, [[Page]] → Page
+        text = re.sub(r'\[\[([^|\]]*\|)?([^\]]*)\]\]', r'\2', text)
+        # Strip markdown formatting that wouldn't appear in model output
+        text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)  # headers
+        text = re.sub(r'^\s*[-*]\s+', '', text, flags=re.MULTILINE)  # bullet points
+        text = re.sub(r'```[^`]*```', '', text, flags=re.DOTALL)  # code blocks
+        text = re.sub(r'`[^`]+`', '', text)  # inline code
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)  # markdown links
         tokens = tokenizer.encode(text)
         self.feed(tokens)
 

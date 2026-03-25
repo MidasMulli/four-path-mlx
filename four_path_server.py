@@ -41,6 +41,7 @@ from prompt_lookup import prompt_lookup_draft
 from ssm_checkpoint import checkpoint_ssm_state, restore_ssm_state
 from ane_drafter import ANEDrafter
 from gdn_drafter import GDNCoreMLDrafter
+from amx_drafter import AMXDrafter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
@@ -72,10 +73,66 @@ model_lock = Lock()
 has_mtp = False
 ane_available = False
 gdn_drafter = None  # GDN CoreML drafter (same-tokenizer, Qwen3.5-0.8B on ANE)
+lightweight_model = None  # Lightweight model for easy queries (ANE routing layer)
+amx_drafter = None       # CPU/AMX draft model (llama.cpp server, zero GPU contention)
 
 # Persistent N-gram table - survives across requests, accumulates patterns
 # from all generated tokens in the session. Resets on server restart.
 persistent_ngram = None
+
+
+# ── Hardware-aware routing ─────────────────────────────────────
+# Classifies query complexity and routes to the appropriate model:
+#   Easy: lightweight model (0.8B on ANE, 2W) answers directly
+#   Hard: full model (9B/70B on GPU, 20W) generates
+# Saves GPU power for queries that don't need it.
+
+EASY_PATTERNS = [
+    # Greetings and simple acknowledgments
+    r'^(hi|hello|hey|thanks|thank you|ok|yes|no|sure|got it)\s*[.!?]?\s*$',
+    # Simple factual questions
+    r'^(what is|what\'s|define|who is|when was|where is)\s+\w+(\s+\w+){0,3}\??$',
+    # Short commands
+    r'^(list|show|tell me|give me)\s+\d+\s+\w+',
+]
+
+def _classify_query_complexity(messages):
+    """Classify whether a query needs the full GPU model or can be handled lightweight.
+    Returns 'easy' or 'hard'. Conservative — defaults to 'hard' when uncertain."""
+    import re
+
+    if not messages:
+        return 'hard'
+
+    # Get the last user message
+    last_user = None
+    for m in reversed(messages):
+        if m.get('role') == 'user':
+            last_user = m.get('content', '')
+            break
+
+    if not last_user:
+        return 'hard'
+
+    # Multi-turn conversations always go to full model
+    user_count = sum(1 for m in messages if m.get('role') == 'user')
+    if user_count > 1:
+        return 'hard'
+
+    # Tool-using requests always go to full model
+    if any(m.get('tool_calls') for m in messages):
+        return 'hard'
+
+    # Long queries go to full model
+    if len(last_user.split()) > 30:
+        return 'hard'
+
+    # Check easy patterns
+    for pattern in EASY_PATTERNS:
+        if re.match(pattern, last_user.strip(), re.IGNORECASE):
+            return 'easy'
+
+    return 'hard'
 
 
 def load_model():
@@ -106,17 +163,10 @@ def load_model():
     persistent_ngram = NgramPredictor(levels=(8, 6, 4, 2))
     log.info(f"Cascading N-gram initialized (levels=8,6,4,2)")
 
-    # Pre-seed with common English patterns from any available corpus
-    try:
-        import glob
-        seed_files = glob.glob(os.path.expanduser("~/Desktop/cowork/vault/**/*.md"), recursive=True)
-        if seed_files:
-            seeded = persistent_ngram.feed_directory(
-                os.path.expanduser("~/Desktop/cowork/vault"), tokenizer,
-                extensions=('.md', '.txt'))
-            log.info(f"N-gram pre-seeded from {seeded} vault files")
-    except Exception as e:
-        log.info(f"N-gram pre-seed skipped: {e}")
+    # Pre-seeding disabled — vault contains enricher artifacts (entity graphs,
+    # similarity scores, metadata) that corrupt output. N-gram learns from
+    # its own output across requests. Pre-seed with curated text only.
+    log.info("N-gram pre-seed: disabled (use curated corpus, not raw vault)")
 
 
 def _get_eos_ids():
@@ -162,6 +212,30 @@ def check_ane():
         log.info("ANE server: not available (PLD + N-gram only)")
 
 
+def _init_amx_drafter():
+    """Start AMX/CPU draft model (llama.cpp server, zero GPU contention).
+    Measured: 160 tok/s generation on M5 Air. 0.5% GPU interference."""
+    global amx_drafter
+    # AMX drafter disabled on <32GB — subprocess memory pressure hurts GPU throughput
+    import platform
+    mem_gb = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024**3)
+    if mem_gb < 32:
+        log.info("AMX drafter: disabled (%.0fGB RAM — needs 32GB+)", mem_gb)
+        return
+    if not os.path.isfile(AMXDrafter().gguf_path):
+        log.info("AMX drafter: GGUF not found, skipping")
+        return
+    if not os.path.isfile(AMXDrafter().llama_cli.replace('llama-cli', 'llama-server')):
+        log.info("AMX drafter: llama-server not built, skipping (cd llama.cpp/build && make llama-server)")
+        return
+    drafter = AMXDrafter()
+    if drafter.start():
+        amx_drafter = drafter
+        log.info("AMX drafter: started (Qwen3-0.6B CPU-only, 160 tok/s, port %d)", drafter.port)
+    else:
+        log.info("AMX drafter: failed to start")
+
+
 def check_gdn():
     """Load GDN CoreML drafter (same-tokenizer Qwen3.5-0.8B on ANE).
 
@@ -195,6 +269,11 @@ def check_gdn():
         drafter.load()
         gdn_drafter = drafter
         log.info("GDN CoreML: loaded (Qwen3.5-0.8B, same tokenizer, 24ms/tok)")
+
+        # Also use as the lightweight routing model for easy queries
+        global lightweight_model
+        lightweight_model = drafter
+        log.info("Routing layer: lightweight model active (easy queries → 0.8B, GPU idle)")
     except Exception as e:
         log.warning("GDN CoreML: failed to load: %s", e)
         gdn_drafter = None
@@ -443,7 +522,7 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
         return False
 
     # Stats
-    sources = {"prompt_lookup": 0, "ngram": 0, "ane": 0, "gpu": 0}
+    sources = {"prompt_lookup": 0, "ngram": 0, "amx": 0, "ane": 0, "gpu": 0}
     ane_proposed = 0
     ane_rounds = 0
     output_tokens = []
@@ -536,8 +615,19 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
         # IAM: use async forward — GPU starts immediately, Python continues
         tokens, logprobs = _forward_async(verify_input, len(draft_chain) + 1)
 
-        # ── CONCURRENT: While GPU verifies, kick off next ANE draft ──
+        # ── CONCURRENT: While GPU verifies, kick off AMX + ANE drafts ──
+        # GPU is computing asynchronously. Use this time to start drafters
+        # for the NEXT round, so drafts are ready when GPU finishes.
         _speculative_next_token = draft_chain[-1] if draft_chain else None
+
+        # AMX drafter: kick off CPU-based draft during GPU verify
+        if amx_drafter and amx_drafter.loaded:
+            if not amx_drafter._draft_thread or not amx_drafter._draft_thread.is_alive():
+                # Build context from recent tokens — speculate from last draft token
+                spec_context = tokenizer.decode(all_tokens[-128:] + list(draft_chain))
+                amx_drafter.draft_async(spec_context, tokenizer, K=min(num_draft, 8))
+
+        # ANE drafter
         if gdn_drafter and gdn_drafter.loaded and _speculative_next_token is not None:
             if not gdn_drafter._draft_thread or not gdn_drafter._draft_thread.is_alive():
                 gdn_drafter.draft_async(K=NUM_DRAFT, last_token=_speculative_next_token)
@@ -613,7 +703,25 @@ def _generate_three_path(prompt_text, prompt_tokens, max_tokens=2048, temperatur
                 break
             continue
 
-        # ── Priority 2: GDN CoreML draft (same tokenizer, 60%+ acceptance) ──
+        # ── Priority 2: AMX CPU draft (zero GPU contention, 160 tok/s) ──
+        if amx_drafter and amx_drafter.loaded:
+            amx_draft = amx_drafter.get_draft(timeout=0.005)
+            if amx_draft:
+                amx_draft = _filter_ngram_chain(amx_draft)  # reuse logprob filter
+                if amx_draft:
+                    n_acc, done = _verify_draft(amx_draft, "amx")
+                    if done:
+                        break
+                    # Kick off next AMX draft with updated context
+                    context_text = tokenizer.decode(all_tokens[-256:])
+                    amx_drafter.draft_async(context_text, tokenizer, K=num_draft)
+                    continue
+            # No draft ready — kick off for next round
+            if not amx_drafter._draft_thread or not amx_drafter._draft_thread.is_alive():
+                context_text = tokenizer.decode(all_tokens[-256:])
+                amx_drafter.draft_async(context_text, tokenizer, K=num_draft)
+
+        # ── Priority 3: GDN CoreML draft (same tokenizer, 60%+ acceptance) ──
         # Only enabled when SPEC_GDN_ENABLE=1 (disabled on M5 Air, enabled on Pro)
         if gdn_drafter and gdn_drafter.loaded:
             gdn_draft = gdn_drafter.get_draft(timeout=0.001)
@@ -831,6 +939,56 @@ class SpecHandler(BaseHTTPRequestHandler):
                 if not msg.get("content"):
                     msg["content"] = None
 
+        # ── Hardware-aware routing: easy queries skip the GPU ──
+        complexity = _classify_query_complexity(messages)
+        if complexity == 'easy' and lightweight_model is not None:
+            log.info(f"Routing: EASY → lightweight 0.8B (GPU idle)")
+            try:
+                lw_prompt = apply_chat_template(messages, tools=None)
+                lw_tokens = tokenizer.encode(lw_prompt)
+
+                # Generate with the lightweight GDN model
+                lw = lightweight_model
+                lw.reset()
+                # Prefill
+                for tok in lw_tokens:
+                    lw._step(tok)
+                # Generate
+                t0 = time.perf_counter()
+                out_tokens = []
+                eos = _get_eos_ids()
+                for _ in range(min(max_tokens, 200)):  # cap lightweight at 200 tokens
+                    logits = lw._step(out_tokens[-1] if out_tokens else lw_tokens[-1])
+                    tok = int(logits[0, 0].argmax())
+                    if tok in eos:
+                        break
+                    out_tokens.append(tok)
+                elapsed = time.perf_counter() - t0
+                lw_text = tokenizer.decode(out_tokens)
+                lw_tps = len(out_tokens) / elapsed if elapsed > 0 else 0
+
+                log.info(f"Lightweight: {len(out_tokens)} tok / {elapsed:.2f}s = {lw_tps:.1f} tok/s")
+
+                return self._json_response({
+                    "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
+                    "object": "chat.completion",
+                    "model": "lightweight-0.8B-ANE",
+                    "created": int(time.time()),
+                    "choices": [{"index": 0, "finish_reason": "stop",
+                        "message": {"role": "assistant", "content": lw_text,
+                                    "reasoning": "", "tool_calls": []}}],
+                    "usage": {"prompt_tokens": len(lw_tokens),
+                        "completion_tokens": len(out_tokens),
+                        "total_tokens": len(lw_tokens) + len(out_tokens)},
+                    "x_routing": {"complexity": "easy", "model": "lightweight-0.8B",
+                                  "tok_per_sec": round(lw_tps, 1)}
+                })
+            except Exception as e:
+                log.info(f"Lightweight routing failed, falling back to GPU: {e}")
+
+        if complexity == 'easy' and lightweight_model is None:
+            log.info(f"Routing: EASY query but no lightweight model loaded → GPU")
+
         try:
             prompt_text = apply_chat_template(messages, tools=tools)
             prompt_tokens = tokenizer.encode(prompt_text)
@@ -1040,12 +1198,15 @@ def main():
     load_model()
     check_ane()
     check_gdn()
+    _init_amx_drafter()
 
     paths = ["N-gram (CPU)", "GPU (9B)"]
     if ane_available:
         paths.insert(1, "ANE (1.7B)")
     if gdn_drafter:
         paths.insert(-1, "GDN CoreML (0.8B)")
+    if amx_drafter:
+        paths.insert(-1, "AMX (0.6B CPU)")
     if has_mtp:
         paths.insert(-1, "MTP (head)")
 
