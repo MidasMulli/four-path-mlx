@@ -96,7 +96,7 @@ Statistically validated: 20 runs × 5 prompts × 6 K values = 600 measurements. 
 
 **K=32 plateau:** K=32/K=16 = 1.002x. The weight load dominates — additional tokens ride the same memory fetch. Theoretical throughput ceiling at K=32: 272 tok/s (11.8x baseline). Measured wall-clock with warm N-gram on CSA drafting: **143.9 tok/s (6.26x)**.
 
-**Important caveat:** Full-model verification includes the 31% sequential GatedDeltaNet overhead — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable via NAX. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements.
+**Important caveat:** Full-model verification includes the 31% sequential GatedDeltaNet overhead — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable via NAX. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements.
 
 ## Architecture
 
@@ -203,7 +203,7 @@ Benchmark prompts are included in `benchmarks/samples/` (ISDA Master Agreements,
 
 3. **MTP catches what others miss.** The model's own MTP head uses hidden states from the current forward pass. It has the highest per-token accuracy of any draft source but only produces one token per round. It fills gaps between N-gram chains.
 
-4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as 16 on M5 Air — and K=8 is actually the worst point on the curve (149.7ms vs 117.7ms at K=32). [Statistically validated](validation/) with 600 measurements (20 runs × 5 prompts × 6 K values). Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul costs only 1.14x at N=32 vs N=1.
+4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as 16 on M5 Air — and K=8 is actually the worst point on the curve (149.7ms vs 117.7ms at K=32). [Statistically validated](validation/) with 600 measurements (20 runs × 5 prompts × 6 K values). Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul costs only 1.14x at N=32 vs N=1.
 
 ## ANE draft source (experimental)
 
@@ -234,7 +234,7 @@ Built and tested on MacBook Air M5, 16GB unified memory, 10 GPU cores, macOS 26.
 
 ## Related
 
-- [orion-ane](https://github.com/MidasMulli/orion-ane) — ANE training + persistent memory daemon + agent framework + [NAX hardware probe](https://github.com/MidasMulli/orion-ane/blob/main/nax-probe/FINDINGS.md)
+- [orion-ane](https://github.com/MidasMulli/cognitive-stack-ane) — ANE training + persistent memory daemon + agent framework + [NAX hardware probe](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md)
 - [gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — GatedDeltaNet SSM to CoreML converter (same-family ANE draft source)
 - [ane-perf](https://github.com/MidasMulli/ane-perf) — ANE hardware performance characterization via IOReport bandwidth histograms
 - [dual-path-inference](https://github.com/MidasMulli/dual-path-inference) — Initial GPU+ANE concurrency proof-of-concept (archived)
