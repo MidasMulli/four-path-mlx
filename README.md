@@ -1,4 +1,4 @@
-> ## ⚠️ ARCHIVED — Llama-stack predecessor of the current Qwen-stack architecture
+> ## ⚠️ ARCHIVED - Llama-stack predecessor of the current Qwen-stack architecture
 >
 > four-path-mlx documented the multi-source heterogeneous speculative decoding
 > measurements on the **Llama 3.1 stack** (CPU N-gram + ANE 1.7B + MTP head + GPU 9B).
@@ -7,8 +7,8 @@
 >
 > The current production stack uses **Qwen 2.5-72B-Instruct-4bit** as the
 > verifier on a different architecture, documented here:
-> - [`ngram-engine`](https://github.com/MidasMulli/ngram-engine) — current Qwen 72B spec decode server with N-gram drafter (truncate-on-miss, K=16) and MLX prefix KV cache. Model-based drafters are dead on this verifier (EAGLE killed on quantized hidden states, sub-1B cross-family drafters killed on the 90× size gap, PARD killed on parallel-from-single-state architecture).
-> - [`orion-ane`](https://github.com/MidasMulli/cognitive-stack-ane) — the Midas agent that uses the Qwen verifier
+> - [`ngram-engine`](https://github.com/MidasMulli/ngram-engine) - current Qwen 72B spec decode server with N-gram drafter (truncate-on-miss, K=16) and MLX prefix KV cache. Model-based drafters are dead on this verifier (EAGLE killed on quantized hidden states, sub-1B cross-family drafters killed on the 90× size gap, PARD killed on parallel-from-single-state architecture).
+> - [`orion-ane`](https://github.com/MidasMulli/cognitive-stack-ane) - the Midas agent that uses the Qwen verifier
 >
 > **This repository is preserved for the Llama-stack measurements.** The
 > drafter findings here informed the conclusions in the current ngram-engine
@@ -39,7 +39,7 @@ On domain-specific text, most of what an LLM generates is predictable by somethi
 
 ## Results
 
-All benchmarks: MacBook Air M5, 16GB unified memory, macOS 26.3 (Tahoe). Model: Qwen3.5-9B-MLX-4bit via MLX 0.31.1. Baseline: ~21 tok/s on stock mlx-lm with the same model, same prompts, same hardware, greedy decoding. Single-run measurements — expect ±10-15% variance across runs (baseline varies ±2-3 tok/s, speedup ratios shift proportionally).
+All benchmarks: MacBook Air M5, 16GB unified memory, macOS 26.3 (Tahoe). Model: Qwen3.5-9B-MLX-4bit via MLX 0.31.1. Baseline: ~21 tok/s on stock mlx-lm with the same model, same prompts, same hardware, greedy decoding. Single-run measurements - expect ±10-15% variance across runs (baseline varies ±2-3 tok/s, speedup ratios shift proportionally).
 
 ### Standalone benchmarks (no agent, no tool calling)
 
@@ -53,7 +53,7 @@ Benchmarked on real SEC filings pulled from EDGAR and ISDA derivatives documenta
 | Document Drafting (10-K MD&A) | 2,048 | 96.6 | 4.60x | 1,907 | 0 | 16 | 115 | 94% |
 | Batch Classification (JSON) | 1,024 | 129.7 | 6.15x (best case) | 937 | 0 | 7 | 70 | 93% |
 
-Source columns show token counts per source. Totals may be ~1% below stated token count due to initial prompt tokens before drafting engages. Batch classification hits 6.15x because structured JSON repeats field names across entries — N-gram eats the schema repetition. This is a best case, not a typical case.
+Source columns show token counts per source. Totals may be ~1% below stated token count due to initial prompt tokens before drafting engages. Batch classification hits 6.15x because structured JSON repeats field names across entries - N-gram eats the schema repetition. This is a best case, not a typical case.
 
 ### Agent with tool calling (real-world usage)
 
@@ -67,7 +67,7 @@ When running as the Midas agent server (system prompt, tool definitions, convers
 | Multi-turn conversation | 25.0 | 1.0x | 0 | 0 | 200 | 0% |
 | Code generation | 25.1 | 1.0x | 0 | 0 | 200 | 0% |
 
-**The floor is ~1x.** On novel analytical text, code, or conversation with no reference context, no draft source has fuel and performance matches baseline. This is by design — the system adds negligible overhead when drafting fails.
+**The floor is ~1x.** On novel analytical text, code, or conversation with no reference context, no draft source has fuel and performance matches baseline. This is by design - the system adds negligible overhead when drafting fails.
 
 ### What determines the speedup
 
@@ -75,7 +75,7 @@ Speedup scales with: (1) generation length, (2) repetition structure of the inpu
 
 **Not copy-paste:** 0% verbatim overlap between generated output and reference documents (verified via SequenceMatcher). The model generates novel text. The draft sources just predict what it's going to say.
 
-**Qwen3.5-9B is a hybrid model** — every layer contains a GatedDeltaNet SSM (31% of per-layer compute) that processes tokens sequentially. This partially explains the 0.96x floor on code generation: when draft acceptance is low, the sequential SSM cost dominates and verification overhead exceeds the savings. Pure attention models would have a higher floor because their verification is fully parallelizable via NAX.
+**Qwen3.5-9B is a hybrid model** - every layer contains a GatedDeltaNet SSM (31% of per-layer compute) that processes tokens sequentially. This partially explains the 0.96x floor on code generation: when draft acceptance is low, the sequential SSM cost dominates and verification overhead exceeds the savings. Pure attention models would have a higher floor because their verification is fully parallelizable via NAX.
 
 ### Batch verification plateau
 
@@ -94,9 +94,9 @@ Statistically validated: 20 runs × 5 prompts × 6 K values = 600 measurements. 
 
 **K=8 inversion:** K=8 (149.7ms) costs 27.4% more than K=16 (117.5ms). The GatedDeltaNet SSM batch processing mode activates between K=8 and K=16. Below this threshold, the sequential recurrence dominates each layer's cost. Above it, the parallel linear projections (which are the bulk of per-layer compute) amortize across tokens via NAX.
 
-**K=32 plateau:** K=32/K=16 = 1.002x. The weight load dominates — additional tokens ride the same memory fetch. Theoretical throughput ceiling at K=32: 272 tok/s (11.8x baseline). Measured wall-clock with warm N-gram on CSA drafting: **143.9 tok/s (6.26x)**.
+**K=32 plateau:** K=32/K=16 = 1.002x. The weight load dominates - additional tokens ride the same memory fetch. Theoretical throughput ceiling at K=32: 272 tok/s (11.8x baseline). Measured wall-clock with warm N-gram on CSA drafting: **143.9 tok/s (6.26x)**.
 
-**Important caveat:** Full-model verification includes the 31% sequential GatedDeltaNet overhead — each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable via NAX. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements.
+**Important caveat:** Full-model verification includes the 31% sequential GatedDeltaNet overhead - each SSM layer processes tokens sequentially regardless of batch size. Pure attention models (e.g., Llama 70B) would show a flatter plateau because attention is fully parallelizable via NAX. See [orion-ane/nax-probe/FINDINGS.md](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) for the hardware-level NAX measurements.
 
 ## Architecture
 
@@ -203,15 +203,15 @@ Benchmark prompts are included in `benchmarks/samples/` (ISDA Master Agreements,
 
 3. **MTP catches what others miss.** The model's own MTP head uses hidden states from the current forward pass. It has the highest per-token accuracy of any draft source but only produces one token per round. It fills gaps between N-gram chains.
 
-4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as 16 on M5 Air — and K=8 is actually the worst point on the curve (149.7ms vs 117.7ms at K=32). [Statistically validated](validation/) with 600 measurements (20 runs × 5 prompts × 6 K values). Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul costs only 1.14x at N=32 vs N=1.
+4. **The batch verification plateau is the core insight.** Verifying 32 draft tokens costs the same as 16 on M5 Air - and K=8 is actually the worst point on the curve (149.7ms vs 117.7ms at K=32). [Statistically validated](validation/) with 600 measurements (20 runs × 5 prompts × 6 K values). Hardware evidence: [NAX probe measurements](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md) show quantized 4-bit matmul costs only 1.14x at N=32 vs N=1.
 
 ## ANE draft source (experimental)
 
 The architecture supports an ANE draft path but cross-tokenizer models don't work for speculative decoding:
 
-**Cross-family (Qwen3 1.7B, 151K vocab → Qwen3.5 9B, 248K vocab):** 60% teacher-forcing acceptance, but 0% autoregressive acceptance. The different tokenizers cause token boundary misalignment — same text produces different token counts, breaking cache synchronization between draft and target. This is structural, not an implementation bug.
+**Cross-family (Qwen3 1.7B, 151K vocab → Qwen3.5 9B, 248K vocab):** 60% teacher-forcing acceptance, but 0% autoregressive acceptance. The different tokenizers cause token boundary misalignment - same text produces different token counts, breaking cache synchronization between draft and target. This is structural, not an implementation bug.
 
-**Same-family ([gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — Qwen3.5-0.8B, same 248K vocab):** 56-70% teacher-forcing acceptance, 37-59% autoregressive acceptance (varies by prompt type). The tokenizer matches, so cache sync works. However, on M5 Air 16GB the 0.8B at 24ms/tok is only 1.75x faster than the 9B at 42ms/tok — insufficient speed ratio for speculative decoding to break even. Measured 0.94x wallclock (slower than baseline).
+**Same-family ([gdn-coreml](https://github.com/MidasMulli/gdn-coreml) - Qwen3.5-0.8B, same 248K vocab):** 56-70% teacher-forcing acceptance, 37-59% autoregressive acceptance (varies by prompt type). The tokenizer matches, so cache sync works. However, on M5 Air 16GB the 0.8B at 24ms/tok is only 1.75x faster than the 9B at 42ms/tok - insufficient speed ratio for speculative decoding to break even. Measured 0.94x wallclock (slower than baseline).
 
 **On 64GB Pro with 70B target:** 0.8B at 24ms/tok vs 70B at ~200ms/tok = 8x speed ratio, in the spec decode sweet spot. The converter was built for this configuration.
 
@@ -234,10 +234,10 @@ Built and tested on MacBook Air M5, 16GB unified memory, 10 GPU cores, macOS 26.
 
 ## Related
 
-- [orion-ane](https://github.com/MidasMulli/cognitive-stack-ane) — ANE training + persistent memory daemon + agent framework + [NAX hardware probe](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md)
-- [gdn-coreml](https://github.com/MidasMulli/gdn-coreml) — GatedDeltaNet SSM to CoreML converter (same-family ANE draft source)
-- [ane-perf](https://github.com/MidasMulli/ane-perf) — ANE hardware performance characterization via IOReport bandwidth histograms
-- [dual-path-inference](https://github.com/MidasMulli/dual-path-inference) — Initial GPU+ANE concurrency proof-of-concept (archived)
+- [orion-ane](https://github.com/MidasMulli/cognitive-stack-ane) - ANE training + persistent memory daemon + agent framework + [NAX hardware probe](https://github.com/MidasMulli/cognitive-stack-ane/blob/main/nax-probe/FINDINGS.md)
+- [gdn-coreml](https://github.com/MidasMulli/gdn-coreml) - GatedDeltaNet SSM to CoreML converter (same-family ANE draft source)
+- [ane-perf](https://github.com/MidasMulli/ane-perf) - ANE hardware performance characterization via IOReport bandwidth histograms
+- [dual-path-inference](https://github.com/MidasMulli/dual-path-inference) - Initial GPU+ANE concurrency proof-of-concept (archived)
 
 ## License
 
