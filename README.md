@@ -1,4 +1,4 @@
-> ## ⚠️ ARCHIVED - Llama-stack predecessor of the current Qwen-stack architecture
+> ## ARCHIVED - Llama-stack predecessor of the current Qwen-stack architecture
 >
 > four-path-mlx documented the multi-source heterogeneous speculative decoding
 > measurements on the **Llama 3.1 stack** (CPU N-gram + ANE 1.7B + MTP head + GPU 9B).
@@ -101,28 +101,28 @@ Statistically validated: 20 runs × 5 prompts × 6 K values = 600 measurements. 
 ## Architecture
 
 ```
-                    ┌─────────────┐
-                    │  Prompt      │
-                    └──────┬──────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         │            │         │             │
-   ┌─────▼─────┐ ┌───▼───┐ ┌──▼──┐  ┌ ─ ─ ─▼─ ─ ─ ┐
-   │  N-gram   │ │  PLD  │ │ GPU │    ANE (0.8B)
-   │  CPU hash │ │  CPU  │ │ MTP │  │  optional,   │
-   │  table    │ │lookup │ │head │    same-family
-   └─────┬─────┘ └───┬───┘ └──┬──┘  └ ─ ─ ─┬─ ─ ─ ┘
-         │            │        │             │
-         └────────────┼────────┴─────────────┘
-                      │
-               ┌──────▼──────┐
-               │   Verify    │
-               │  (GPU 9B)   │
-               └──────┬──────┘
-                      │
-               ┌──────▼──────┐
-               │   Output    │
-               └─────────────┘
+ ┌─────────────┐
+ │ Prompt │
+ └──────┬──────┘
+ │
+ ┌─────────────────┼─────────────────┐
+ │ │ │ │
+ ┌─────▼─────┐ ┌───▼───┐ ┌──▼──┐ ┌ ─ ─ ─▼─ ─ ─ ┐
+ │ N-gram │ │ PLD │ │ GPU │ ANE (0.8B)
+ │ CPU hash │ │ CPU │ │ MTP │ │ optional, │
+ │ table │ │lookup │ │head │ same-family
+ └─────┬─────┘ └───┬───┘ └──┬──┘ └ ─ ─ ─┬─ ─ ─ ┘
+ │ │ │ │
+ └────────────┼────────┴─────────────┘
+ │
+ ┌──────▼──────┐
+ │ Verify │
+ │ (GPU 9B) │
+ └──────┬──────┘
+ │
+ ┌──────▼──────┐
+ │ Output │
+ └─────────────┘
 ```
 
 ## Quick start
@@ -137,10 +137,10 @@ cd four-path-mlx
 python server/server.py
 
 # It auto-detects available paths:
-#   Prompt lookup: always on
-#   N-gram: always on
-#   MTP: if ~/models/Qwen3.5-9B-MLX-4bit-MTP weights exist
-#   GPU: always on
+# Prompt lookup: always on
+# N-gram: always on
+# MTP: if ~/models/Qwen3.5-9B-MLX-4bit-MTP weights exist
+# GPU: always on
 ```
 
 The server exposes `/v1/chat/completions` and `/v1/models`. Any OpenAI-compatible client works. Your existing code doesn't change.
@@ -162,10 +162,10 @@ prompt_mx = mx.array(tokens, mx.uint32)
 drafter = FourPathDrafter(ngram_n=8)
 
 for tok, logprobs, from_draft, source in four_path_generate_step(
-    prompt_mx, model, drafter, tokenizer=tokenizer,
-    max_tokens=1024,
+ prompt_mx, model, drafter, tokenizer=tokenizer,
+ max_tokens=1024,
 ):
-    print(tokenizer.decode([tok]), end="", flush=True)
+ print(tokenizer.decode([tok]), end="", flush=True)
 ```
 
 ### Adding MTP (optional, +0.3x on generation tasks)
