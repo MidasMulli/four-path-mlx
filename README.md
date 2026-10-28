@@ -1,21 +1,11 @@
-> ## ARCHIVED - Llama-stack predecessor of the current Qwen-stack architecture
+> ## Archived research record
 >
-> four-path-mlx documented the multi-source heterogeneous speculative decoding
-> measurements on the **Llama 3.1 stack** (CPU N-gram + ANE 1.7B + MTP head + GPU 9B).
-> Those measurements stand as historical evidence of how heterogeneous spec
-> decode performs across four concurrent draft sources on Apple Silicon.
+> Historical multi-source speculative-decoding experiments on Apple Silicon.
+> Model, hardware and workload conditions are recorded with the measurements below.
+> This repository is not the current server deployment guide.
 >
-> The current production stack uses **Qwen 2.5-72B-Instruct-4bit** as the
-> verifier on a different architecture, documented here:
-> - [`ngram-engine`](https://github.com/MidasMulli/ngram-engine) - current Qwen 72B spec decode server with N-gram drafter (truncate-on-miss, K=16) and MLX prefix KV cache. Model-based drafters are dead on this verifier (EAGLE killed on quantized hidden states, sub-1B cross-family drafters killed on the 90× size gap, PARD killed on parallel-from-single-state architecture).
-> - [`orion-ane`](https://github.com/MidasMulli/cognitive-stack-ane) - the Midas agent that uses the Qwen verifier
->
-> **This repository is preserved for the Llama-stack measurements.** The
-> drafter findings here informed the conclusions in the current ngram-engine
-> repo about which drafter classes are dead on quantized verifiers.
->
-> ---
->
+> See [ngram-engine](https://github.com/MidasMulli/ngram-engine) for the separately documented server and [cognitive-stack-ane (Orion)](https://github.com/MidasMulli/cognitive-stack-ane) for the local-agent stack. Consult those repositories for their own model versions and status.
+
 # Four-Path Speculative Decoding on Apple Silicon
 
 Four prediction sources, three processors, one generate loop. Measured 1-4.6x speedup on financial document tasks. Same model, same weights, same output.
